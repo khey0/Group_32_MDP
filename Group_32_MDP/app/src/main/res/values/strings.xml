@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Group_32_MDP</string>
+    <string name="bluetooth_button">Scan for Bluetooth Devices</string>
+    <string name="scanning">Scanning…</string>
+</resources>
