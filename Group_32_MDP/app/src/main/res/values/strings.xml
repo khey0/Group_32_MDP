@@ -2,4 +2,9 @@
     <string name="app_name">Group_32_MDP</string>
     <string name="bluetooth_button">Scan for Bluetooth Devices</string>
     <string name="scanning">Scanning…</string>
+    <string name="received_messages">Received Messages:</string>
+    <string name="send">Send</string>
+    <string name="connect_to_a_device">Connect To A Device</string>
+    <string name="not_connected">Not connected</string>
+    <string name="type_your_message">Type your message</string>
 </resources>
