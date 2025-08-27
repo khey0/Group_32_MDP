@@ -51,6 +51,7 @@ public class BluetoothActivity extends AppCompatActivity {
     private BluetoothAdapter adapter;
     private ArrayList<BluetoothDevice> availableDevices = new ArrayList<>();
     private ArrayAdapter<String> availableDevicesAdapter;
+    private static final int REQUEST_LOCATION_PERMISSION = 1;
 
     private static final UUID MY_UUID =
             UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -63,19 +64,13 @@ public class BluetoothActivity extends AppCompatActivity {
             isBound = true;
 
             adapter = BluetoothAdapter.getDefaultAdapter();
+            //check if there is bluetooth on the device
             if (adapter == null) {
                 Toast.makeText(BluetoothActivity.this, "Bluetooth not supported", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(BluetoothActivity.this, MainActivity.class);
                 startActivity(intent);
             }
 
-            if (!adapter.isEnabled()) {
-                Toast.makeText(BluetoothActivity.this, "Bluetooth is OFF", Toast.LENGTH_SHORT).show();
-                // Optionally prompt user to turn on Bluetooth
-                Intent enableBt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivity(enableBt);
-                return;
-            }
 
             // Enable buttons now that service is ready
             pairedListView.setEnabled(true);
@@ -83,7 +78,7 @@ public class BluetoothActivity extends AppCompatActivity {
             scanButton.setEnabled(true);
             disconnectBtn.setEnabled(true);
 
-            Toast.makeText(BluetoothActivity.this, "Bluetooth Service Connected", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(BluetoothActivity.this, "Bluetooth Service Connected", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -209,6 +204,7 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
 
+
         // Register receiver
         if (!isReceiverRegistered) {
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -321,6 +317,17 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     };
 
+    private void ensureLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_LOCATION_PERMISSION
+                );
+            }
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -349,9 +356,22 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onResume();
 
         adapter = BluetoothAdapter.getDefaultAdapter();
+        // request user to enable bluetooth if disabled
         if (adapter != null && !adapter.isEnabled()) {
             Intent enableBt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBt);
+        }
+
+        // Location Permission
+        ensureLocationPermission();
+
+        // Ensure Location is ON (required for scanning in Android 6.0+)
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) { // Android 9+
+            if (!locationManager.isLocationEnabled()) {
+                Toast.makeText(this, "Please enable Location for Bluetooth scanning", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
         }
     }
     @Override
