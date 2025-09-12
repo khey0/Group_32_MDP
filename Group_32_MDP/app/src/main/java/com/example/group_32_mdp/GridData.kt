@@ -1,5 +1,8 @@
 package com.example.group_32_mdp
 
+import android.graphics.Bitmap
+
+
 /**
  * Data class to represent a single grid cell
  */
@@ -17,7 +20,9 @@ object GridData {
     
     // 2D array to store grid cell information
     private val grid = Array(20) { Array(20) { GridCell() } }
-    
+
+    private var car: Car? = null // car object, initially null
+
     // Public getter for the grid array
     val gridArray: Array<Array<GridCell>>
         get() = grid
@@ -32,7 +37,22 @@ object GridData {
             null
         }
     }
-    
+    // Getter for car
+    fun getCar(): Car? = car
+
+    // Setter for car
+    fun setCar(car: Car) {
+        this.car = car
+    }
+    // helper function to check if a certain area has obstacles
+    fun isAreaClear(xRange: IntRange, yRange: IntRange): Boolean {
+        return xRange.all { checkX ->
+            yRange.all { checkY ->
+                getCell(checkX, checkY)?.hasObstacle == false
+            }
+        }
+    }
+
     /**
      * Set obstacle at specific coordinates
      */
@@ -194,7 +214,7 @@ object GridData {
         grid[newY][newX] = existing.copy(direction = direction)
         grid[oldY][oldX] = GridCell()
     }
-    
+
     /**
      * Check if a position has an obstacle
      */

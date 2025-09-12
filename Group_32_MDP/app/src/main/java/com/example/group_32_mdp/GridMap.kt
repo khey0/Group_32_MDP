@@ -1,15 +1,19 @@
 package com.example.group_32_mdp
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.round
+import com.example.group_32_mdp.Direction
 
 class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
@@ -43,6 +47,10 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private var isDragging: Boolean = false
     private var dragTouchX: Float = 0f
     private var dragTouchY: Float = 0f
+
+    // Car related variables
+    private var isSettingStart = false
+    private var carBitmap: Bitmap? = null
 
     // Grid origin coordinates
     private var originX: Float = 0f
@@ -137,6 +145,9 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
         // Draw obstacles
         drawObstacles(canvas)
+        // Draw Car
+        drawCar(canvas)
+
 
         // Draw grid lines pixel-aligned so none disappear
         val endX = originX + gridSide
@@ -233,16 +244,79 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             val right = left + cellSize
             val bottom = top + cellSize
 
+            // Draw dragged obstacle with slight transparency
             val draggedPaint = Paint(obstaclePaint)
             draggedPaint.alpha = 160
             canvas.drawRect(left, top, right, bottom, draggedPaint)
 
+            // Draw obstacle number
             val textX = left + cellSize / 2f
             val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
             canvas.drawText(draggedObstacle!!.id.toString(), textX, textY, obstacleTextPaint)
 
+            // Draw direction indicator
             drawDirectionIndicator(canvas, draggedObstacle!!.direction, left, top, right, bottom)
         }
+    }
+
+    private fun drawCar(canvas: Canvas) {
+        GridData.getCar()?.let { c ->
+            carBitmap?.let { bitmap ->
+                val drawY = ROW - 1 - c.y // invert Y for canvas drawing
+                val left = originX + c.x * cellSize
+                val top = originY + drawY * cellSize
+                val targetRect = android.graphics.RectF(
+                    left,
+                    top,
+                    left + cellSize * 2f,
+                    top + cellSize * 2f
+                )
+
+                val matrix = android.graphics.Matrix()
+
+                // Step 1: rotate around bitmap center
+                val angle = when (c.direction) {
+                    Direction.NORTH -> 0f
+                    Direction.EAST  -> 90f
+                    Direction.SOUTH -> 180f
+                    Direction.WEST  -> 270f
+                }
+                val centerX = bitmap.width / 2f
+                val centerY = bitmap.height / 2f
+                matrix.postRotate(angle, centerX, centerY)
+
+                // Step 2: map the rotated bitmap bounds
+                val rotatedBounds = android.graphics.RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+                matrix.mapRect(rotatedBounds)
+
+                // Step 3: scale so rotated bitmap fits 2×2 cells
+                val scaleX = targetRect.width() / rotatedBounds.width()
+                val scaleY = targetRect.height() / rotatedBounds.height()
+                matrix.postScale(scaleX, scaleY, 0f, 0f)
+
+                // Step 4: re-map bounds after scale
+                val finalBounds = android.graphics.RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+                matrix.mapRect(finalBounds)
+
+                // Step 5: translate so final bounds top-left aligns with targetRect
+                val dx = targetRect.left - finalBounds.left
+                val dy = targetRect.top - finalBounds.top
+                matrix.postTranslate(dx, dy)
+
+                // Draw
+                canvas.drawBitmap(bitmap, matrix, null)
+            }
+        }
+    }
+
+
+    // Car functions
+    fun enableCarPlacement() {
+        isSettingStart = true
+    }
+    fun setCarBitmap(bitmap: Bitmap) {
+        carBitmap = bitmap
+        invalidate()
     }
 
     private fun drawDirectionIndicator(canvas: Canvas, direction: Direction, left: Float, top: Float, right: Float, bottom: Float) {
@@ -313,6 +387,18 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                         obstacleListener?.onObstacleEditRequested(selectedObstacle!!)
                     }
                     return selectedObstacle != null
+                } else if (isSettingStart) { // flag from MainActivity
+                    if (gridX <= 18 && gridY <= 18) { // ensure 2x2 car fits
+                        val flippedY = ROW - 1 - gridY
+                        val startCar = Car(x = gridX, y = flippedY, direction = Direction.NORTH)
+                        GridData.setCar(startCar)
+                        setCarBitmap(BitmapFactory.decodeResource(resources, R.drawable.f1_car))
+
+                        // Log the car coordinates
+                        Log.d("GridMap", "Car set at coordinates: x=${startCar.x}, y=${startCar.y}")
+                    }
+                    isSettingStart = false
+                    return true
                 } else {
                     // Not in placement mode → do nothing on touch
                     return false
