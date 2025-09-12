@@ -1,44 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="@color/colorWhite">
 
-    <!-- Bluetooth Button -->
-    <Button
-        android:id="@+id/bluetoothUIButton"
-        android:layout_width="198dp"
-        android:layout_height="45dp"
-        android:text="@string/connect_to_a_device"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <!-- Add the statusText TextView -->
-    <TextView
-        android:id="@+id/statusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Not Connected"
-        android:textSize="16sp"
-        android:padding="8dp"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/bluetoothUIButton"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="16dp" />
-
-    <!-- GridMap View (to display the grid) -->
-    <com.example.group_32_mdp.GridMap
-        android:id="@+id/gridMap"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/statusText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginTop="16dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Top Controls Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:background="@drawable/border_black">
+
+            <!-- Bluetooth Button -->
+            <Button
+                android:id="@+id/bluetoothUIButton"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:text="@string/connect_to_a_device"
+                android:background="@drawable/border_black"
+                android:layout_marginEnd="16dp" />
+
+            <!-- Status Text -->
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Not Connected"
+                android:textSize="16sp"
+                android:textColor="@color/colorBlack"
+                android:gravity="center_vertical" />
+
+        </LinearLayout>
+
+        <!-- Main Content Area -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <!-- GridMap View -->
+            <com.example.group_32_mdp.GridMap
+                android:id="@+id/gridMap"
+                android:layout_width="435dp"
+                android:layout_height="400dp"
+                android:layout_marginBottom="8dp"
+                android:layout_weight="0" />
+
+            <!-- Obstacle Controls -->
+            <LinearLayout
+                android:layout_width="264dp"
+                android:layout_height="90dp"
+                android:background="@drawable/border_black"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <!-- Obstacle Icon -->
+                <ImageButton
+                    android:id="@+id/obstacleIcon"
+                    android:layout_width="76dp"
+                    android:layout_height="71dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/border_black"
+                    android:contentDescription="Obstacle icon"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/obstacle_icon" />
+
+
+                <!-- Toggle Buttons Container -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <!-- Edit Obstacle Toggle -->
+                    <LinearLayout
+                        android:layout_width="157dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="Edit Obstacle:"
+                            android:textColor="@color/colorBlack" />
+
+                        <Switch
+                            android:id="@+id/editObstacleToggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                    <!-- Drag Obstacle Toggle -->
+                    <LinearLayout
+                        android:layout_width="157dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="Drag Obstacle:"
+                            android:textColor="@color/colorBlack" />
+
+                        <Switch
+                            android:id="@+id/dragObstacleToggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
