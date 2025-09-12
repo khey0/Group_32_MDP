@@ -8,185 +8,228 @@
     tools:context=".MainActivity"
     android:background="@color/colorWhite">
 
+    <!-- Bluetooth Controls -->
+
+
+    <!-- GridMap -->
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:id="@+id/bluetooth_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="680dp"
+        android:background="@drawable/border_black"
+        android:orientation="vertical"
+        android:padding="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Top Controls Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/bluetoothUIButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:background="@drawable/border_black">
+            android:text="@string/connect_to_a_device" />
 
-            <LinearLayout
-                android:id="@+id/bluetooth_layout"
-                android:layout_width="339dp"
-                android:layout_height="465dp"
-                android:orientation="vertical"
-                android:padding="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@id/gridMap">
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:padding="4dp"
+            android:text="@string/not_connected"
+            android:textSize="14sp" />
 
-                <Button
-                    android:id="@+id/bluetoothUIButton"
-                    android:layout_width="198dp"
-                    android:layout_height="45dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/connect_to_a_device"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.961"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/statusText"
-                    android:layout_width="300dp"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/white"
-                    android:padding="8dp"
-                    android:scrollbars="vertical"
-                    android:text="@string/not_connected"
-                    android:textSize="16sp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <EditText
-                        android:id="@+id/messageInput"
-                        android:layout_width="200dp"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/type_your_message"
-                        android:inputType="text"
-                        android:padding="8dp" />
-
-                    <Button
-                        android:id="@+id/sendBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="@string/send" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/receivedMsgLabel"
-                    android:layout_width="154dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/received_messages" />
-
-                <ScrollView
-                    android:id="@+id/msgScroll"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:fillViewport="true">
-
-                    <TextView
-                        android:id="@+id/msgTxt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="vertical"
-                        android:text="" />
-                </ScrollView>
-            </LinearLayout>
-
-        <!-- Main Content Area -->
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <!-- GridMap View -->
-            <com.example.group_32_mdp.GridMap
-                android:id="@+id/gridMap"
-                android:layout_width="435dp"
-                android:layout_height="400dp"
-                android:layout_marginBottom="8dp"
-                android:layout_weight="0" />
+            <EditText
+                android:id="@+id/messageInput"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/type_your_message"
+                android:inputType="text" />
 
-            <!-- Obstacle Controls -->
-            <LinearLayout
-                android:layout_width="264dp"
-                android:layout_height="90dp"
-                android:background="@drawable/border_black"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="8dp">
-
-                <!-- Obstacle Icon -->
-                <ImageButton
-                    android:id="@+id/obstacleIcon"
-                    android:layout_width="76dp"
-                    android:layout_height="71dp"
-                    android:layout_marginEnd="16dp"
-                    android:background="@drawable/border_black"
-                    android:contentDescription="Obstacle icon"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/obstacle_icon" />
-
-
-                <!-- Toggle Buttons Container -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <!-- Edit Obstacle Toggle -->
-                    <LinearLayout
-                        android:layout_width="157dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:text="Edit Obstacle:"
-                            android:textColor="@color/colorBlack" />
-
-                        <Switch
-                            android:id="@+id/editObstacleToggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                    <!-- Drag Obstacle Toggle -->
-                    <LinearLayout
-                        android:layout_width="157dp"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:text="Drag Obstacle:"
-                            android:textColor="@color/colorBlack" />
-
-                        <Switch
-                            android:id="@+id/dragObstacleToggle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
+            <Button
+                android:id="@+id/sendBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/send" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/receivedMsgLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/received_messages" />
+
+        <ScrollView
+            android:id="@+id/msgScroll"
+            android:layout_width="200dp"
+            android:layout_height="150dp">
+
+            <TextView
+                android:id="@+id/msgTxt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="" />
+        </ScrollView>
     </LinearLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <com.example.group_32_mdp.GridMap
+        android:id="@+id/gridMap"
+        android:layout_width="770dp"
+        android:layout_height="607dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Start Controls (new block) -->
+
+    <!-- Obstacle Controls -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/start_controls"
+        android:layout_width="323dp"
+        android:layout_height="213dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gridMap">
+
+        <Button
+            android:id="@+id/setStartButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Start Point"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setStartButton">
+
+            <ImageButton
+                android:id="@+id/fButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:layout_constraintStart_toEndOf="@id/flButton"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@android:drawable/arrow_up_float" />
+
+            <ImageButton
+                android:id="@+id/bButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:layout_constraintStart_toEndOf="@id/blButton"
+                app:layout_constraintTop_toBottomOf="@id/fButton"
+                app:srcCompat="@android:drawable/arrow_down_float" />
+
+            <ImageButton
+                android:id="@+id/frButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:layout_constraintStart_toEndOf="@id/fButton"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/fr" />
+
+            <ImageButton
+                android:id="@+id/flButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:scaleX="-1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/fr" />
+
+            <ImageButton
+                android:id="@+id/blButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:adjustViewBounds="true"
+                android:rotation="180"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/fr" />
+
+            <ImageButton
+                android:id="@+id/brButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:adjustViewBounds="true"
+                android:rotation="180"
+                android:scaleType="fitCenter"
+                android:scaleX="-1"
+                app:layout_constraintStart_toEndOf="@id/bButton"
+                app:layout_constraintTop_toBottomOf="@id/frButton"
+                app:srcCompat="@drawable/fr" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/obstacle_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@drawable/border_black"
+        app:layout_constraintTop_toBottomOf="@id/start_controls"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/obstacleIcon"
+            android:layout_width="76dp"
+            android:layout_height="71dp"
+            android:background="@drawable/border_black"
+            android:src="@drawable/obstacle_icon"
+            android:contentDescription="Obstacle icon" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Edit Obstacle:"
+                    android:textColor="@color/colorBlack" />
+
+                <Switch
+                    android:id="@+id/editObstacleToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drag Obstacle:"
+                    android:textColor="@color/colorBlack" />
+
+                <Switch
+                    android:id="@+id/dragObstacleToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

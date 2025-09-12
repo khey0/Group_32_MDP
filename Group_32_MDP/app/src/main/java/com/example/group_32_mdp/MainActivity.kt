@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var editObstacleToggle: Switch? = null
     private var dragObstacleToggle: Switch? = null
     private var isObstaclePlacementActive: Boolean = false
-    private var gridMap: GridMap? = null  // Reference to GridMap
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -207,7 +206,7 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         setupDirectionButton(blButton, Car::moveBackwardLeft, "bl")
         setupDirectionButton(frButton, Car::moveForwardRight, "fr")
         setupDirectionButton(brButton, Car::moveBackwardRight, "br")
-    }
+
 
         // Drag obstacle switch
         dragObstacleToggle?.setOnCheckedChangeListener { _, isChecked ->

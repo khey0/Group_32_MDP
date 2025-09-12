@@ -13,7 +13,6 @@ import android.view.View
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.round
-import com.example.group_32_mdp.Direction
 
 class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
