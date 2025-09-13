@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
@@ -67,6 +68,30 @@ class MainActivity : AppCompatActivity() {
 
                     // Scroll to the bottom automatically
                     msgScroll.post(Runnable { msgScroll.fullScroll(View.FOCUS_DOWN) })
+
+                    if (msg.startsWith("ROBOT")) {
+                        val parts = msg.split(",")
+                        if (parts.size == 4) {
+                            val x = parts[1].trim().toInt()
+                            val y = parts[2].trim().toInt()
+                            val direction = Direction.fromLetter(parts[3].trim())
+
+                            // flip Y because GridMap’s logical origin is bottom-left
+                            val flippedY = (gridMap?.rowCount ?: 20) - 1 - y   // or just 20 if fixed
+
+                            val startCar = Car(x = x, y = flippedY, direction = direction)
+                            GridData.setCar(startCar)
+
+                            // use the GridMap instance to update the bitmap and redraw
+                            gridMap?.setCarBitmap(
+                                BitmapFactory.decodeResource(resources, R.drawable.f1_car)
+                            )
+                            gridMap?.invalidate()
+
+                            Log.d("GridMap", "Car updated to: x=$x, y=$flippedY, dir=$direction")
+                        }
+                    }
+
                 }
             }
         }

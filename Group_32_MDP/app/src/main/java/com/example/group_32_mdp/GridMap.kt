@@ -283,7 +283,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     // Car functions
     fun enableCarPlacement() {
-        isSettingStart = true
+        isSettingStart = !isSettingStart
     }
     fun setCarBitmap(bitmap: Bitmap) {
         carBitmap = bitmap
