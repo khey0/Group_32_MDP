@@ -56,10 +56,15 @@ object GridData {
     fun isAreaClear(xRange: IntRange, yRange: IntRange): Boolean {
         return xRange.all { checkX ->
             yRange.all { checkY ->
-                getCell(checkX, checkY)?.hasObstacle == false
+                // Flip Y to match grid array indexing (top-left origin)
+                val flippedY = 19 - checkY
+                val cell = getCell(checkX, flippedY)
+                cell != null && !cell.hasObstacle
             }
         }
     }
+
+
 
     /**
      * Set obstacle at specific coordinates

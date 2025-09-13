@@ -6,98 +6,94 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:background="@android:color/white">
+    android:background="@color/colorWhite">
+
+
+
+    <!-- GridMap -->
 
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="339dp"
-        android:layout_height="465dp"
+        android:layout_width="314dp"
+        android:layout_height="349dp"
+        android:layout_marginTop="616dp"
+        android:layout_marginEnd="40dp"
+        android:background="@drawable/border_black"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/gridMap">
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/bluetoothUIButton"
-            android:layout_width="198dp"
-            android:layout_height="45dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/connect_to_a_device"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.961"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/connect_to_a_device" />
 
         <TextView
             android:id="@+id/statusText"
-            android:layout_width="300dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:padding="8dp"
-            android:scrollbars="vertical"
+            android:padding="4dp"
             android:text="@string/not_connected"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/messageInput"
-                android:layout_width="200dp"
+                android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/type_your_message"
-                android:inputType="text"
-                android:padding="8dp" />
+                android:inputType="text" />
 
             <Button
                 android:id="@+id/sendBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
                 android:text="@string/send" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/receivedMsgLabel"
-            android:layout_width="154dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/received_messages" />
 
         <ScrollView
             android:id="@+id/msgScroll"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:fillViewport="true">
+            android:layout_width="200dp"
+            android:layout_height="150dp">
 
             <TextView
                 android:id="@+id/msgTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="vertical"
                 android:text="" />
         </ScrollView>
     </LinearLayout>
 
-    <!-- GridMap View (to display the grid) -->
     <com.example.group_32_mdp.GridMap
         android:id="@+id/gridMap"
-        android:layout_width="445dp"
-        android:layout_height="394dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/bluetooth_layout"
-        app:layout_constraintHorizontal_bias="0.367"
+        android:layout_width="770dp"
+        android:layout_height="607dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Start Controls (new block) -->
+
+    <!-- Obstacle Controls -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="370dp"
-        android:layout_height="338dp"
-        android:layout_marginStart="60dp"
+        android:id="@+id/start_controls"
+        android:layout_width="323dp"
+        android:layout_height="213dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/gridMap">
 
@@ -106,13 +102,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Set Start Point"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/setStartButton"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/setStartButton">
 
             <ImageButton
                 android:id="@+id/fButton"
@@ -173,8 +169,77 @@
                 app:layout_constraintStart_toEndOf="@id/bButton"
                 app:layout_constraintTop_toBottomOf="@id/frButton"
                 app:srcCompat="@drawable/fr" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/obstacle_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="@drawable/border_black"
+        app:layout_constraintTop_toBottomOf="@id/start_controls"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/obstacleIcon"
+            android:layout_width="76dp"
+            android:layout_height="71dp"
+            android:background="@drawable/border_black"
+            android:src="@drawable/obstacle_icon"
+            android:contentDescription="Obstacle icon" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Edit Obstacle:"
+                    android:textColor="@color/colorBlack" />
+
+                <Switch
+                    android:id="@+id/editObstacleToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Drag Obstacle:"
+                    android:textColor="@color/colorBlack" />
+
+                <Switch
+                    android:id="@+id/dragObstacleToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/robotStatusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:text="Robot Status"
+        tools:layout_editor_absoluteX="202dp"
+        tools:layout_editor_absoluteY="1031dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

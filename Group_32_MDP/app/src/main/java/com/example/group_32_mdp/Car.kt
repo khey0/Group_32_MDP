@@ -8,27 +8,27 @@ data class Car(
     var direction: Direction = Direction.NORTH,
     val width: Int = 2,  // 2x2 dimension
     val height: Int = 2,
-    val leewayHead: Int = 2, // determines offset to front of car when turning forwards
-    val leewaySide: Int = 3, // determine offset to sides of car when turning forwards
-    val leewayBack: Int = 3, // determines offset to back of car when turning backwards
-    val leewayBSide: Int = 2 // determine offset to sides of car when turning backwards
+    val leewayHead: Int = 1, // determines offset to front of car when turning forwards
+    val leewaySide: Int = 1, // determine offset to sides of car when turning forwards
+    val leewayBack: Int = 1, // determines offset to back of car when turning backwards
+    val leewayBSide: Int = 1 // determine offset to sides of car when turning backwards
 ) {
     fun moveForward() {
         when (direction) {
-            Direction.NORTH -> if (y < 19 && GridData.getCell(x, y + 1)?.hasObstacle == false) y += 1       // can't go past top
-            Direction.SOUTH -> if (y > 1 && GridData.getCell(x, y - 1)?.hasObstacle == false) y -= 1                 // can't go below 0
-            Direction.EAST  -> if (x < 18 && GridData.getCell(x+1, y)?.hasObstacle == false) x += 1        // can't go past right edge
-            Direction.WEST  -> if (x > 0 && GridData.getCell(x - 1 , y)?.hasObstacle == false) x -= 1                 // can't go past left edge
+            Direction.NORTH -> if (y < 19 && GridData.isAreaClear(x..x+width-1,y+1..y+1)) y += 1       // can't go past top
+            Direction.SOUTH -> if (y > 1 && GridData.isAreaClear(x..x+width-1,y-height..y-height)) y -= 1                 // can't go below 0
+            Direction.EAST  -> if (x < 18 && GridData.isAreaClear(x+height..x+height,y-width+1..y)) x += 1        // can't go past right edge
+            Direction.WEST  -> if (x > 0 && GridData.isAreaClear(x-1..x-1,y-width+1..y)) x -= 1                 // can't go past left edge
         }
         Log.d("this","Car moved to ($x, $y)")
     }
 
     fun moveBackward() {
         when (direction) {
-            Direction.NORTH -> if (y > 1 && GridData.getCell(x, y - 1)?.hasObstacle == false) y -= 1
-            Direction.SOUTH -> if (y < 19 && GridData.getCell(x, y + 1)?.hasObstacle == false) y += 1
-            Direction.EAST -> if (x > 0 && GridData.getCell(x - 1, y)?.hasObstacle == false) x -= 1
-            Direction.WEST -> if (x < 18 && GridData.getCell(x + 1, y)?.hasObstacle == false) x += 1
+            Direction.NORTH -> if (y > 1 && GridData.isAreaClear(x..x+width-1,y-height..y)) y -= 1
+            Direction.SOUTH -> if (y < 19 && GridData.isAreaClear(x..x+width-1,y+1..y+1)) y += 1
+            Direction.EAST -> if (x > 0 && GridData.isAreaClear(x-1..x-1,y-width+1..y)) x -= 1
+            Direction.WEST -> if (x < 18 && GridData.isAreaClear(x+height..x+height,y-width+1..y)) x += 1
         }
         Log.d("this","Car moved to ($x, $y)")
     }
