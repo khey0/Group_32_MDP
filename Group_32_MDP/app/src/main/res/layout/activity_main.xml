@@ -8,23 +8,22 @@
     tools:context=".MainActivity"
     android:background="@color/colorWhite">
 
+    <!-- Bluetooth Controls -->
 
 
     <!-- GridMap -->
 
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="314dp"
-        android:layout_height="349dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="28dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="680dp"
         android:background="@drawable/border_black"
         android:orientation="vertical"
         android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.816"
-        app:layout_constraintStart_toEndOf="@+id/start_controls"
-        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent">
 
         <Button
             android:id="@+id/bluetoothUIButton"
@@ -92,8 +91,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/start_controls"
-        android:layout_width="168dp"
-        android:layout_height="158dp"
+        android:layout_width="323dp"
+        android:layout_height="213dp"
         android:layout_marginStart="28dp"
         android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,8 +103,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Set Start Point"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
@@ -173,28 +171,25 @@
                 app:layout_constraintTop_toBottomOf="@id/frButton"
                 app:srcCompat="@drawable/fr" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/obstacle_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/border_black"
         android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/start_controls">
+        android:background="@drawable/border_black"
+        app:layout_constraintTop_toBottomOf="@id/start_controls"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
             android:id="@+id/obstacleIcon"
             android:layout_width="76dp"
             android:layout_height="71dp"
             android:background="@drawable/border_black"
-            android:contentDescription="Obstacle icon"
-            android:src="@drawable/obstacle_icon" />
+            android:src="@drawable/obstacle_icon"
+            android:contentDescription="Obstacle icon" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -236,15 +231,5 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-    <EditText
-        android:id="@+id/robotStatusText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Robot Status"
-        tools:layout_editor_absoluteX="307dp"
-        tools:layout_editor_absoluteY="1101dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

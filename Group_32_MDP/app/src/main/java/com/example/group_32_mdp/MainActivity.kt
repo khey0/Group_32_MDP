@@ -13,25 +13,34 @@ import android.os.IBinder
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.Switch
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, EditObstacleDialog.OnObstacleUpdatedListener {
 
     private var bluetoothService: BluetoothService? = null
     private var isBound = false
-
-    private var statusText: TextView? = null
+    private var statusText: TextView? = null  // Reference to statusText
     private var messageInput: EditText? = null
     private var sendBtn: Button? = null
+
     private var bluetoothBtn: Button? = null
     private var gridMap: GridMap? = null  // Reference to GridMap
+
+    // Obstacle controls
+    private var obstacleIcon: ImageView? = null
+    private var editObstacleToggle: Switch? = null
+    private var dragObstacleToggle: Switch? = null
+    private var isObstaclePlacementActive: Boolean = false
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -119,6 +128,12 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize GridMap view
         gridMap = findViewById(R.id.gridMap)
+        gridMap?.setObstacleInteractionListener(this)
+
+        // Initialize statusText
+        statusText = findViewById(R.id.statusText)
+        // Initialize GridMap view
+        gridMap = findViewById(R.id.gridMap)
 
         // Initialize Bluetooth layout buttons
         statusText = findViewById<TextView>(R.id.statusText) // to show connection status
@@ -133,6 +148,13 @@ class MainActivity : AppCompatActivity() {
         blButton = findViewById<ImageButton>(R.id.blButton)
         bButton = findViewById<ImageButton>(R.id.bButton)
         brButton = findViewById<ImageButton>(R.id.brButton)
+
+        bluetoothBtn = findViewById(R.id.bluetoothUIButton)
+
+        // Initialize obstacle controls
+        obstacleIcon = findViewById(R.id.obstacleIcon)
+        editObstacleToggle = findViewById(R.id.editObstacleToggle)
+        dragObstacleToggle = findViewById(R.id.dragObstacleToggle)
 
         // Start service (binding happens in onStart)
         val serviceIntent = Intent(this, BluetoothService::class.java)
@@ -165,6 +187,41 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         })
 
+        // Obstacle icon click listener (toggle placement mode)
+        obstacleIcon?.setOnClickListener {
+            if (!isObstaclePlacementActive) {
+                // Turn ON placement mode
+                gridMap?.setObstacleMode(true)
+                isObstaclePlacementActive = true
+                obstacleIcon?.alpha = 0.5f
+                android.widget.Toast.makeText(this, "Please plot obstacles", android.widget.Toast.LENGTH_SHORT).show()
+                // turn off other modes
+                editObstacleToggle?.isChecked = false
+                dragObstacleToggle?.isChecked = false
+            } else {
+                // Turn OFF placement mode
+                gridMap?.setObstacleMode(false)
+                isObstaclePlacementActive = false
+                obstacleIcon?.alpha = 1.0f
+            }
+        }
+
+        // Edit obstacle switch
+        editObstacleToggle?.setOnCheckedChangeListener { _, isChecked ->
+            // Leaving placement mode if switching to edit
+            if (isChecked) {
+                isObstaclePlacementActive = false
+                obstacleIcon?.alpha = 1.0f
+                gridMap?.setEditMode(true)
+                // toggle off drag
+                if (dragObstacleToggle?.isChecked == true) dragObstacleToggle?.isChecked = false
+                android.widget.Toast.makeText(this, "edit obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                gridMap?.setEditMode(false)
+                android.widget.Toast.makeText(this, "edit obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
         setStartButton?.setOnClickListener {
             gridMap?.enableCarPlacement()
         }
@@ -174,8 +231,24 @@ class MainActivity : AppCompatActivity() {
         setupDirectionButton(blButton, Car::moveBackwardLeft, "bl")
         setupDirectionButton(frButton, Car::moveForwardRight, "fr")
         setupDirectionButton(brButton, Car::moveBackwardRight, "br")
-    }
 
+
+        // Drag obstacle switch
+        dragObstacleToggle?.setOnCheckedChangeListener { _, isChecked ->
+            // Leaving placement mode if switching to drag
+            if (isChecked) {
+                isObstaclePlacementActive = false
+                obstacleIcon?.alpha = 1.0f
+                gridMap?.setDragMode(true)
+                // toggle off edit
+                if (editObstacleToggle?.isChecked == true) editObstacleToggle?.isChecked = false
+                android.widget.Toast.makeText(this, "drag obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                gridMap?.setDragMode(false)
+                android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     private fun setupDirectionButton(
         button: ImageButton?,
         carAction: Car.() -> Unit,
@@ -210,4 +283,37 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(statusReceiver)
     }
+
+    // Obstacle interaction callbacks
+    override fun onObstacleCreated(obstacle: Obstacle) {
+        // Send obstacle data via Bluetooth
+        sendObstacleData(obstacle)
+    }
+
+    override fun onObstacleMoved(obstacle: Obstacle) {
+        // Send updated obstacle data via Bluetooth
+        sendObstacleData(obstacle)
+    }
+
+    override fun onObstacleEditRequested(obstacle: Obstacle) {
+        // Show edit dialog
+        val dialog = EditObstacleDialog.newInstance(obstacle)
+        dialog.show(supportFragmentManager, "EditObstacleDialog")
+    }
+
+    override fun onObstacleUpdated(obstacle: Obstacle) {
+        // Update the obstacle in the grid
+        gridMap?.updateObstacle(obstacle)
+        // Send updated data via Bluetooth
+        sendObstacleData(obstacle)
+    }
+
+    private fun sendObstacleData(obstacle: Obstacle) {
+        if (isBound && bluetoothService != null) {
+            val message = "OBSTACLE,${obstacle.id},${obstacle.x},${obstacle.y},${obstacle.direction.name}"
+            bluetoothService?.sendMessage(message)
+        }
+    }
+
+
 }

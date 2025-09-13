@@ -13,7 +13,6 @@ import android.view.View
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.round
-import com.example.group_32_mdp.Direction
 
 class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
@@ -25,7 +24,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val obstacleTextPaint = Paint()
     private val directionPaint = Paint()
 
-
     private val COL = 20
     private val ROW = 20
     private var cellSize: Float = 0f
@@ -36,7 +34,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val axisMarginPx = 24f * density
 
     // Limit grid to avoid spanning full width (fraction of available width)
-    private val maxWidthFraction = 0.85f
+    private val maxWidthFraction = 0.80f
 
     // Obstacle management
     private var nextObstacleId = 1
@@ -45,9 +43,9 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private var isEditMode = false
     private var draggedObstacle: Obstacle? = null
     private var selectedObstacle: Obstacle? = null
-    private var dragOffsetX: Float = 0f
-    private var dragOffsetY: Float = 0f
     private var isDragging: Boolean = false
+    private var dragTouchX: Float = 0f
+    private var dragTouchY: Float = 0f
 
     // Car related variables
     private var isSettingStart = false
@@ -93,14 +91,14 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun addObstacle(x: Int, y: Int): Obstacle {
         val obstacle = Obstacle(nextObstacleId++, x, y)
-        GridData.setObstacle(x, y, obstacle.id)
+        GridData.setObstacle(x, y, obstacle.id, obstacle.direction)
         obstacleListener?.onObstacleCreated(obstacle)
         invalidate()
         return obstacle
     }
 
     fun updateObstacle(obstacle: Obstacle) {
-        GridData.setObstacle(obstacle.x, obstacle.y, obstacle.id)
+        GridData.setObstacle(obstacle.x, obstacle.y, obstacle.id, obstacle.direction)
         obstacleListener?.onObstacleCreated(obstacle)
         invalidate()
     }
@@ -129,7 +127,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
         // Origin: shift right by left axis margin; center remaining space
         val extraSpaceX = availableWidth - gridSide
-        originX = paddingLeft + axisMarginPx + maxOf(0f, extraSpaceX / 2f)
+        // Pin grid as far left as possible while preserving Y-axis label margin
+        originX = paddingLeft + axisMarginPx
         originY = paddingTop.toFloat()
 
         // Draw cells first
@@ -177,18 +176,47 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         }
     }
 
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        // Compute desired size so the view wraps just the grid plus axis margins
+        val specWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val specHeight = MeasureSpec.getSize(heightMeasureSpec)
+        val specWidthMode = MeasureSpec.getMode(widthMeasureSpec)
+        val specHeightMode = MeasureSpec.getMode(heightMeasureSpec)
+
+        val paddingW = paddingLeft + paddingRight
+        val paddingH = paddingTop + paddingBottom
+
+        val availableWidth = (if (specWidthMode == MeasureSpec.UNSPECIFIED) Int.MAX_VALUE else specWidth) - paddingW
+        val availableHeight = (if (specHeightMode == MeasureSpec.UNSPECIFIED) Int.MAX_VALUE else specHeight) - paddingH
+
+        // Reserve margins for labels
+        val usableWidth = (availableWidth - axisMarginPx).coerceAtLeast(0f)
+        val usableHeight = (availableHeight - axisMarginPx).coerceAtLeast(0f)
+
+        // Constrain width usage so grid doesn't span entire width
+        val widthCap = usableWidth * maxWidthFraction
+        val candidateSide = min(usableHeight, widthCap)
+        val desiredCell = if (candidateSide > 0) floor(candidateSide / COL) else 0f
+        val gridSide = (desiredCell * COL).coerceAtLeast(0f)
+
+        val desiredWidth = (axisMarginPx + gridSide + paddingW).toInt()
+        val desiredHeight = (axisMarginPx + gridSide + paddingH).toInt()
+
+        val measuredW = resolveSize(desiredWidth, widthMeasureSpec)
+        val measuredH = resolveSize(desiredHeight, heightMeasureSpec)
+        setMeasuredDimension(measuredW, measuredH)
+    }
+
     private fun drawObstacles(canvas: Canvas) {
         // Draw obstacles from GridData
         for (y in 0 until ROW) {
             for (x in 0 until COL) {
                 val cell = GridData.getCell(x, y)
                 if (cell?.hasObstacle == true) {
-                    // Skip drawing the dragged obstacle at its original position
-                    if (isDragging && draggedObstacle != null &&
-                        draggedObstacle!!.x == x && draggedObstacle!!.y == y) {
+                    // Hide the original while dragging the same obstacle
+                    if (isDragging && draggedObstacle != null && draggedObstacle!!.x == x && draggedObstacle!!.y == y) {
                         continue
                     }
-
                     val left = originX + x * cellSize
                     val top = originY + y * cellSize
                     val right = left + cellSize
@@ -208,16 +236,16 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             }
         }
 
-        // Draw dragged obstacle at current touch position
+        // Draw floating obstacle following the finger while dragging
         if (isDragging && draggedObstacle != null) {
-            val left = originX + draggedObstacle!!.x * cellSize + dragOffsetX
-            val top = originY + draggedObstacle!!.y * cellSize + dragOffsetY
+            val left = dragTouchX - cellSize / 2f
+            val top = dragTouchY - cellSize / 2f
             val right = left + cellSize
             val bottom = top + cellSize
 
             // Draw dragged obstacle with slight transparency
             val draggedPaint = Paint(obstaclePaint)
-            draggedPaint.alpha = 150
+            draggedPaint.alpha = 160
             canvas.drawRect(left, top, right, bottom, draggedPaint)
 
             // Draw obstacle number
@@ -226,7 +254,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             canvas.drawText(draggedObstacle!!.id.toString(), textX, textY, obstacleTextPaint)
 
             // Draw direction indicator
-            //drawDirectionIndicator(canvas, draggedObstacle!!.Direction, left, top, right, bottom)
+            drawDirectionIndicator(canvas, draggedObstacle!!.direction, left, top, right, bottom)
         }
     }
 
@@ -342,13 +370,10 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     if (GridData.hasObstacleAt(gridX, gridY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
                         val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        //draggedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                        draggedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
                         isDragging = true
-                        // Calculate offset from touch point to obstacle center
-                        val obstacleCenterX = originX + gridX * cellSize + cellSize / 2f
-                        val obstacleCenterY = originY + gridY * cellSize + cellSize / 2f
-                        dragOffsetX = x - obstacleCenterX
-                        dragOffsetY = y - obstacleCenterY
+                        dragTouchX = x
+                        dragTouchY = y
                         invalidate()
                     }
                     return draggedObstacle != null
@@ -357,7 +382,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     if (GridData.hasObstacleAt(gridX, gridY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
                         val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        //selectedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                        selectedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
                         obstacleListener?.onObstacleEditRequested(selectedObstacle!!)
                     }
                     return selectedObstacle != null
@@ -373,40 +398,51 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     }
                     isSettingStart = false
                     return true
+                } else {
+                    // Not in placement mode → do nothing on touch
+                    return false
                 }
             }
             MotionEvent.ACTION_MOVE -> {
-                if (isDragMode && draggedObstacle != null && isDragging) {
-                    // Update drag offset to follow finger
-                    val obstacleCenterX = originX + draggedObstacle!!.x * cellSize + cellSize / 2f
-                    val obstacleCenterY = originY + draggedObstacle!!.y * cellSize + cellSize / 2f
-                    dragOffsetX = x - obstacleCenterX
-                    dragOffsetY = y - obstacleCenterY
+                if (isDragMode && draggedObstacle != null) {
+                    // Update floating position; relocate only on drop
+                    dragTouchX = x
+                    dragTouchY = y
                     invalidate()
                     return true
                 }
             }
             MotionEvent.ACTION_UP -> {
-                if (isDragMode && draggedObstacle != null && isDragging) {
-                    // Calculate which grid cell the obstacle should be dropped on
-                    val dropX = ((x - dragOffsetX - originX) / cellSize).toInt()
-                    val dropY = ((y - dragOffsetY - originY) / cellSize).toInt()
+                if (isDragMode && draggedObstacle != null) {
+                    // Recompute drop cell from release position
+                    val dropGridX = ((event.x - originX) / cellSize).toInt()
+                    val dropGridY = ((event.y - originY) / cellSize).toInt()
 
-                    // Check if drop position is valid
-                    if (dropX in 0..19 && dropY in 0..19 && !GridData.hasObstacleAt(dropX, dropY)) {
-                        // Move obstacle to new position
-                        val moved = GridData.moveObstacle(draggedObstacle!!.x, draggedObstacle!!.y, dropX, dropY)
-                        if (moved) {
-                            val updatedObstacle = draggedObstacle!!.copy(x = dropX, y = dropY)
-                            obstacleListener?.onObstacleMoved(updatedObstacle)
+                    val originalX = draggedObstacle!!.x
+                    val originalY = draggedObstacle!!.y
+
+                    var movedSuccessfully = false
+                    // If drop is inside grid, try to move
+                    if (dropGridX in 0 until COL && dropGridY in 0 until ROW) {
+                        if (!GridData.hasObstacleAt(dropGridX, dropGridY)) {
+                            movedSuccessfully = GridData.moveObstacle(
+                                originalX,
+                                originalY,
+                                dropGridX,
+                                dropGridY
+                            )
+                            if (movedSuccessfully) {
+                                val updatedObstacle = draggedObstacle!!.copy(x = dropGridX, y = dropGridY)
+                                obstacleListener?.onObstacleMoved(updatedObstacle)
+                            }
                         }
+                    } else {
+                        // Dropped outside grid: delete the obstacle
+                        GridData.removeObstacle(originalX, originalY)
                     }
 
-                    // Reset drag state
                     draggedObstacle = null
                     isDragging = false
-                    dragOffsetX = 0f
-                    dragOffsetY = 0f
                     invalidate()
                     return true
                 }
