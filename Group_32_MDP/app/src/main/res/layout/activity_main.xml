@@ -17,13 +17,12 @@
         android:id="@+id/bluetooth_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="680dp"
+        android:layout_marginTop="144dp"
         android:background="@drawable/border_black"
         android:orientation="vertical"
         android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/robotStatusBox">
 
         <Button
             android:id="@+id/bluetoothUIButton"
@@ -231,5 +230,58 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/robotStatusBox"
+        android:layout_width="212dp"
+        android:layout_height="163dp"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+
+        <TextView
+            android:id="@+id/robotStatusTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Robot Status"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/robotStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Ready" />
+
+        <TextView
+            android:id="@+id/directionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Direction"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/directionStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="None" />
+
+        <TextView
+            android:id="@+id/coordinatesTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Coordinates"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/coordinatesStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="X: 0, Y: 0" />
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

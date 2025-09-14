@@ -188,7 +188,7 @@ class BluetoothActivity : AppCompatActivity() {
                 bluetoothService?.disconnect()
 
                 // Start connection asynchronously
-                bluetoothService?.connect(selectedDevice, MY_UUID, object : BluetoothService.ConnectionCallback {
+                bluetoothService?.connect(selectedDevice, BluetoothConstants.APP_UUID, object : BluetoothService.ConnectionCallback {
                     override fun onResult(success: Boolean) {
                         runOnUiThread {
                             isConnecting = false
@@ -266,7 +266,7 @@ class BluetoothActivity : AppCompatActivity() {
                 // Already paired → connect directly
                 bluetoothService!!.connect(
                     device,
-                    MY_UUID,
+                    BluetoothConstants.APP_UUID,
                     object : BluetoothService.ConnectionCallback {
                         override fun onResult(success: Boolean) {
                             runOnUiThread {
@@ -306,7 +306,7 @@ class BluetoothActivity : AppCompatActivity() {
                                 // Connect after pairing
                                 bluetoothService!!.connect(
                                     device,
-                                    BluetoothActivity.MY_UUID, // ✅ Fully qualified
+                                    BluetoothConstants.APP_UUID,
                                     object : BluetoothService.ConnectionCallback {
                                         override fun onResult(success: Boolean) {
                                             runOnUiThread {
@@ -456,6 +456,5 @@ class BluetoothActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
 
-        private val MY_UUID: UUID? = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     }
 }

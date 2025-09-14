@@ -8,6 +8,17 @@ data class Obstacle(
 )
 
 enum class Direction {
-    NORTH, SOUTH, EAST, WEST
+    NORTH, SOUTH, EAST, WEST;
+    companion object {
+        fun fromLetter(letter: String): Direction {
+            return when (letter.uppercase()) {
+                "N" -> NORTH
+                "S" -> SOUTH
+                "E" -> EAST
+                "W" -> WEST
+                else -> throw IllegalArgumentException("Invalid direction letter: $letter")
+            }
+        }
+    }
 }
 

@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.round
@@ -49,6 +50,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     // Car related variables
     private var isSettingStart = false
+    private var setStartButton: Button? = null
     private var carBitmap: Bitmap? = null
 
     // Grid origin coordinates
@@ -72,6 +74,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         isObstacleMode = enabled
         isDragMode = false
         isEditMode = false
+        isSettingStart = false
         invalidate()
     }
 
@@ -79,6 +82,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         isDragMode = enabled
         isObstacleMode = false
         isEditMode = false
+        isSettingStart = false
         invalidate()
     }
 
@@ -86,6 +90,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         isEditMode = enabled
         isObstacleMode = false
         isDragMode = false
+        isSettingStart = false
         invalidate()
     }
 
@@ -304,19 +309,41 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
                 // Draw
                 canvas.drawBitmap(bitmap, matrix, null)
+                onCarUpdated?.invoke(c.x, c.y, c.direction)
             }
         }
     }
 
 
     // Car functions
-    fun enableCarPlacement() {
-        isSettingStart = !isSettingStart
+    fun enableCarPlacement(){
+        isSettingStart = true
+        isEditMode = false
+        isObstacleMode = false
+        isDragMode = false
+
+        invalidate()
     }
+
+    fun disableCarPlacement(){
+        isSettingStart = false
+        onCarPlacedListener?.invoke()
+        invalidate()
+    }
+
+    var onCarUpdated: ((x: Int, y: Int, direction: Direction) -> Unit)? = null
+
+    var onCarPlacedListener: (() -> Unit)? = null
+
+    fun isPlacingCar(): Boolean = isSettingStart
+
     fun setCarBitmap(bitmap: Bitmap) {
         carBitmap = bitmap
         invalidate()
     }
+
+    fun getRowCount(): Int = ROW
+    fun getColCount(): Int = COL
 
     private fun drawDirectionIndicator(canvas: Canvas, direction: Direction, left: Float, top: Float, right: Float, bottom: Float) {
         val borderWidth = 4f * density
@@ -397,6 +424,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                         Log.d("GridMap", "Car set at coordinates: x=${startCar.x}, y=${startCar.y}")
                     }
                     isSettingStart = false
+                    onCarPlacedListener?.invoke()
                     return true
                 } else {
                     // Not in placement mode → do nothing on touch

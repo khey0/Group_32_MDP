@@ -3,8 +3,12 @@ package com.example.group_32_mdp
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
@@ -21,15 +25,94 @@ import java.util.UUID
 //to request a connection/information about a device with a remote device thru BluetoothSocket
 //connection point for exchanging data using InputStream and OutputStream
 class BluetoothService : Service() {
-    private var socket: BluetoothSocket? =
-        null // represents connection to a remote Bluetooth device
+    private var socket: BluetoothSocket? = null // represents connection to a remote Bluetooth device
+
+    private var serverSocket: BluetoothServerSocket? = null
     private var `in`: InputStream? = null
     private var out: OutputStream? = null
+
+    private var manualDisconnect = false //shows if we disconnect on our own
+    private var remoteDisconnected = false
+
 
     private var lastDevice: BluetoothDevice? = null
     private var lastUUID: UUID? = null
     private val binder: IBinder =
         LocalBinder() // allows activities to bind to this service & call its public methods
+
+    private val reconnectHandler = Handler(Looper.getMainLooper())
+    private val reconnectRunnable = object : Runnable {
+        override fun run() {
+            if (lastDevice != null && lastUUID != null) {
+                Log.d("BluetoothService", "Auto-reconnect attempt…")
+                connect(lastDevice!!, lastUUID) { success ->
+                    if (!success) {
+                        Log.d("BluetoothService", "Reconnect failed, retrying in 5s")
+                        reconnectHandler.postDelayed(this, 500)
+                    } else {
+                        Log.d("BluetoothService", "Auto-reconnect succeeded")
+                    }
+                }
+            }
+        }
+    }
+
+
+    private fun startServer(uuid: UUID) {
+        Thread {
+            try {
+                val adapter = BluetoothAdapter.getDefaultAdapter()
+                serverSocket = adapter.listenUsingRfcommWithServiceRecord("MyAppServer", uuid)
+                while (true) {
+                    val incomingSocket = serverSocket?.accept() // blocking call
+                    if (incomingSocket != null) {
+                        socket = incomingSocket
+                        `in` = socket!!.inputStream
+                        out = socket!!.outputStream
+                        remoteDisconnected = false
+                        sendStatusBroadcast("Connected")
+                        listenForMessages()
+                    }
+                }
+            } catch (e: IOException) {
+                Log.d("BluetoothService", "Server socket error: ${e.message}")
+            }
+        }.start()
+    }
+
+
+    private val aclReceiver = object : BroadcastReceiver() {
+        override fun onReceive(ctx: Context?, intent: Intent) {
+            val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
+            if (device != null && device == lastDevice) {
+                Log.d("BluetoothService", "ACL disconnected for ${device.address}")
+                handleRemoteDisconnect()
+            }
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        registerReceiver(aclReceiver, IntentFilter().apply {
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED)
+        })
+        // Start listening for incoming connections
+        startServer(BluetoothConstants.APP_UUID)
+    }
+
+
+
+
+    private fun handleRemoteDisconnect() {
+        if (manualDisconnect) return   // don’t act if we disconnected ourselves
+        remoteDisconnected = true      // mark that the remote ended the connection
+        sendStatusBroadcast("Waiting for Bluetooth device to reconnect")
+        // No auto-reconnect here – the server socket will wait for the remote device
+    }
+
+
+
 
     // provides reference to this service when an activity binds(activity can call its methods)
     inner class LocalBinder : Binder() {
@@ -63,6 +146,7 @@ class BluetoothService : Service() {
         lastUUID = uuid
         Thread(Runnable {
             try {
+                manualDisconnect = false  // reset flag on attempt
                 // Close old socket before making a new one (for reconnections)
                 if (socket != null) {
                     try {
@@ -105,50 +189,38 @@ class BluetoothService : Service() {
     private fun listenForMessages() {
         Thread(Runnable {
             val buffer = ByteArray(1024)
-            var bytes = 0
-            try { // continously runs while there is a connection and stream has not ended
-                while (socket != null && socket!!.isConnected() && (`in`!!.read(buffer)
-                        .also { bytes = it }) != -1
-                ) {
-                    val msg = String(buffer, 0, bytes) //converts bytes to string
+            var bytes: Int = 0  // initialize here
+            try {
+                while (socket != null && socket!!.isConnected() && (`in`!!.read(buffer).also { bytes = it }) != -1) {
+                    val msg = String(buffer, 0, bytes)
+                    Log.d("BluetoothActivity", "Received: $msg")
 
-                    Log.d("BluetoothActivity", "Received: " + msg)
                     // Broadcast message to activity
                     val intent = Intent("BLUETOOTH_MESSAGE")
-                    intent.putExtra("message", msg) //msg from remote device
+                    intent.putExtra("message", msg)
                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
                 }
-            } catch (e: IOException) { // to handle connection loss
-                Log.d("BluetoothService", "Connection lost: " + e.message)
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    Toast.makeText(this@BluetoothService, "Connection lost", Toast.LENGTH_SHORT)
-                        .show()
-                })
+            } catch (e: IOException) {
+                Log.d("BluetoothService", "Connection lost: ${e.message}")
 
-                if (socket != null) {
-                    try {
-                        socket!!.close()
-                    } catch (ignored: IOException) {
-                    }
+                Handler(Looper.getMainLooper()).post {
+                    Toast.makeText(this@BluetoothService, "Connection lost", Toast.LENGTH_SHORT).show()
                 }
+
+                // Clean up socket
+                try { socket?.close() } catch (ignored: IOException) {}
                 socket = null
                 sendStatusBroadcast("Disconnected")
 
-                // Attempt reconnect automatically
-                if (lastDevice != null && lastUUID != null) {
-                    Log.d("BluetoothService", "Attempting automatic reconnect...")
-                    connect(lastDevice!!, lastUUID) { success ->
-                        if (success) Log.d("BluetoothService", "Reconnected automatically")
-                        else {
-                            Log.d("BluetoothService", "Reconnect failed")
-                            sendStatusBroadcast("Reconnect failed")
-                        }
-                    }
-
+                if (!manualDisconnect && !remoteDisconnected) {
+                    // Only auto-reconnect if not manual or remote disconnect
+                    handleRemoteDisconnect() // this could be renamed to handleErrorDisconnect()
                 }
             }
         }).start()
     }
+
+
 
     fun sendMessage(message: String) {
         if (socket != null && socket!!.isConnected()) {
@@ -162,13 +234,14 @@ class BluetoothService : Service() {
     }
 
     fun disconnect() {
+        manualDisconnect = true  // mark that this is user-initiated
         try {
-            if (socket != null) socket!!.close()
-        } catch (ignored: IOException) {
-        }
+            socket?.close()
+        } catch (ignored: IOException) {}
         socket = null
         sendStatusBroadcast("Disconnected")
     }
+
 
     @Throws(Exception::class)
     private fun createFallbackSocket(device: BluetoothDevice): BluetoothSocket? {
@@ -187,12 +260,15 @@ class BluetoothService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        // Clean up socket
         if (socket != null) {
-            try {
-                socket!!.close()
-            } catch (ignored: IOException) {
-            }
+            try { socket!!.close() } catch (ignored: IOException) {}
             socket = null
         }
+
+        // Unregister ACL receiver
+        try { unregisterReceiver(aclReceiver) } catch (ignored: IllegalArgumentException) {}
     }
+
 }

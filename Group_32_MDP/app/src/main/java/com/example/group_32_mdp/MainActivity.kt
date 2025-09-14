@@ -22,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
+import androidx.appcompat.app.AlertDialog
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
 
@@ -29,7 +30,10 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
     private var bluetoothService: BluetoothService? = null
     private var isBound = false
-    private var statusText: TextView? = null  // Reference to statusText
+    private var statusText: TextView? = null
+    private var robotStatusText: TextView? = null
+    private var coordinatesStatusText: TextView? = null
+    private var directionStatusText: TextView? = null
     private var messageInput: EditText? = null
     private var sendBtn: Button? = null
 
@@ -79,27 +83,40 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                     msgScroll.post(Runnable { msgScroll.fullScroll(View.FOCUS_DOWN) })
 
                     if (msg.startsWith("ROBOT")) {
-                        val parts = msg.split(",")
+                        val parts = msg.split(",") // split message by comma
                         if (parts.size == 4) {
-                            val x = parts[1].trim().toInt()
-                            val y = parts[2].trim().toInt()
-                            val direction = Direction.fromLetter(parts[3].trim())
+                            try {
+                                val map = gridMap ?: return
+                                val maxX = map.getColCount() - 2
+                                val maxY = map.getRowCount() - 1
+                                var x = parts[1].trim().toInt()
+                                var y = parts[2].trim().toInt()
+                                val direction = Direction.fromLetter(parts[3].trim())
 
-                            // flip Y because GridMap’s logical origin is bottom-left
-                            val flippedY = (gridMap?.rowCount ?: 20) - 1 - y   // or just 20 if fixed
+                                if (x < 0) x = 0
+                                if (x > maxX) x = maxX
+                                if (y < 1) y = 1
+                                if (y > maxY) y = maxY
 
-                            val startCar = Car(x = x, y = flippedY, direction = direction)
-                            GridData.setCar(startCar)
+                                val startCar = Car(x = x, y = y, direction = direction)
+                                GridData.setCar(startCar)
 
-                            // use the GridMap instance to update the bitmap and redraw
-                            gridMap?.setCarBitmap(
-                                BitmapFactory.decodeResource(resources, R.drawable.f1_car)
-                            )
-                            gridMap?.invalidate()
+                                gridMap?.setCarBitmap(
+                                    BitmapFactory.decodeResource(resources, R.drawable.f1_car)
+                                )
+                                gridMap?.invalidate()
 
-                            Log.d("GridMap", "Car updated to: x=$x, y=$flippedY, dir=$direction")
+                                Log.d("GridMap", "Car updated to: x=$x, y=$y, dir=$direction")
+                            } catch (e: Exception) {
+                                // Catch NumberFormatException or any unexpected parsing error
+                                Log.w("GridMap", "Invalid ROBOT message: $msg", e)
+                            }
+                        } else {
+                            Log.w("GridMap", "Unexpected ROBOT format: $msg")
                         }
                     }
+
+
 
                 }
             }
@@ -107,16 +124,34 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     }
 
     // for updating bluetooth connection status
+    private var reconnectDialog: AlertDialog? = null  // store reference so we can dismiss
     private val statusReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
-            val status = intent.getStringExtra("status")
-            if (status != null) {
-                if (status == "Connected") {
-                    statusText!!.setText(status)
-                    statusText!!.setTextColor(Color.GREEN)
-                } else {
-                    statusText!!.setText(status)
-                    statusText!!.setTextColor(Color.RED)
+            val status = intent.getStringExtra("status") ?: return
+
+            when (status) {
+                "Connected" -> {
+                    reconnectDialog?.dismiss()
+                    statusText?.text = status
+                    statusText?.setTextColor(Color.GREEN)
+                }
+                "Waiting for Bluetooth device to reconnect" -> {
+                    // Show blocking dialog
+                    if (reconnectDialog == null || reconnectDialog?.isShowing == false) {
+                        reconnectDialog = AlertDialog.Builder(this@MainActivity)
+                            .setTitle("Bluetooth Disconnected")
+                            .setMessage("Waiting for Bluetooth device to reconnect...")
+                            .setCancelable(false) // blocks user interaction
+                            .create()
+                        reconnectDialog?.show()
+                    }
+                    statusText?.text = status
+                    statusText?.setTextColor(Color.YELLOW)
+                }
+                "Disconnected" -> {
+                    reconnectDialog?.dismiss()
+                    statusText?.text = status
+                    statusText?.setTextColor(Color.RED)
                 }
             }
         }
@@ -132,6 +167,9 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
         // Initialize statusText
         statusText = findViewById(R.id.statusText)
+        robotStatusText = findViewById(R.id.robotStatus)
+        coordinatesStatusText = findViewById(R.id.coordinatesStatus)
+        directionStatusText = findViewById(R.id.directionStatus)
         // Initialize GridMap view
         gridMap = findViewById(R.id.gridMap)
 
@@ -140,6 +178,7 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         messageInput = findViewById<EditText>(R.id.messageInput)
         sendBtn = findViewById<Button>(R.id.sendBtn)
         bluetoothBtn = findViewById<Button>(R.id.bluetoothUIButton)
+
         //Initialize Car Buttons
         setStartButton = findViewById<Button>(R.id.setStartButton)
         flButton = findViewById<ImageButton>(R.id.flButton)
@@ -148,8 +187,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         blButton = findViewById<ImageButton>(R.id.blButton)
         bButton = findViewById<ImageButton>(R.id.bButton)
         brButton = findViewById<ImageButton>(R.id.brButton)
-
-        bluetoothBtn = findViewById(R.id.bluetoothUIButton)
 
         // Initialize obstacle controls
         obstacleIcon = findViewById(R.id.obstacleIcon)
@@ -198,6 +235,11 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 // turn off other modes
                 editObstacleToggle?.isChecked = false
                 dragObstacleToggle?.isChecked = false
+                // Turn OFF car placement if active
+                if (gridMap?.isPlacingCar() == true) {
+                    gridMap?.disableCarPlacement()
+                }
+                setStartButton?.alpha = 1.0f
             } else {
                 // Turn OFF placement mode
                 gridMap?.setObstacleMode(false)
@@ -222,9 +264,33 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             }
         }
 
+        gridMap?.onCarPlacedListener = {
+            runOnUiThread {
+                setStartButton?.alpha = 1.0f
+            }
+        }
+        gridMap.onCarUpdated = { x, y, direction ->
+            runOnUiThread {
+                coordinatesStatusText!!.text = "Coordinates: ($x, $y)"
+                directionStatusText!!.text = "Direction: $direction"
+            }
+        }
+
+
         setStartButton?.setOnClickListener {
             gridMap?.enableCarPlacement()
+            // Fade/unfade buttons like you do for obstacles and edit/drag modes
+            val placing = gridMap?.isPlacingCar() == true
+            setStartButton?.alpha = if (placing) 0.5f else 1.0f
+
+            // turn off other modes
+            editObstacleToggle?.isChecked = false
+            dragObstacleToggle?.isChecked = false
+            isObstaclePlacementActive = false
+            obstacleIcon?.alpha = 1.0f
         }
+
+
         setupDirectionButton(fButton, Car::moveForward, "f")
         setupDirectionButton(bButton, Car::moveBackward, "b")
         setupDirectionButton(flButton, Car::moveForwardLeft, "fl")
@@ -312,6 +378,24 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         if (isBound && bluetoothService != null) {
             val message = "OBSTACLE,${obstacle.id},${obstacle.x},${obstacle.y},${obstacle.direction.name}"
             bluetoothService?.sendMessage(message)
+        }
+    }
+
+    fun updateRobotStatus(status: String) {
+        runOnUiThread {
+            robotStatusText.text = "Status: $status"
+        }
+    }
+
+    fun updateCoordinatesStatus(x: Int, y: Int) {
+        runOnUiThread {
+            coordinatesStatusText.text = "Coordinates: ($x, $y)"
+        }
+    }
+
+    fun updateDirectionStatus(direction: String) {
+        runOnUiThread {
+            directionStatusText.text = "Direction: $direction"
         }
     }
 
