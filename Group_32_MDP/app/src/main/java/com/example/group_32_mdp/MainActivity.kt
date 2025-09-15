@@ -235,11 +235,13 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 // turn off other modes
                 editObstacleToggle?.isChecked = false
                 dragObstacleToggle?.isChecked = false
+
                 // Turn OFF car placement if active
                 if (gridMap?.isPlacingCar() == true) {
                     gridMap?.disableCarPlacement()
                 }
                 setStartButton?.alpha = 1.0f
+
             } else {
                 // Turn OFF placement mode
                 gridMap?.setObstacleMode(false)
@@ -258,6 +260,13 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 // toggle off drag
                 if (dragObstacleToggle?.isChecked == true) dragObstacleToggle?.isChecked = false
                 android.widget.Toast.makeText(this, "edit obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+
+                // Turn OFF car placement if active
+                if (gridMap?.isPlacingCar() == true) {
+                    gridMap?.disableCarPlacement()
+                }
+                setStartButton?.alpha = 1.0f
+
             } else {
                 gridMap?.setEditMode(false)
                 android.widget.Toast.makeText(this, "edit obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
@@ -269,7 +278,7 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 setStartButton?.alpha = 1.0f
             }
         }
-        gridMap.onCarUpdated = { x, y, direction ->
+        gridMap?.onCarUpdated = { x, y, direction ->
             runOnUiThread {
                 coordinatesStatusText!!.text = "Coordinates: ($x, $y)"
                 directionStatusText!!.text = "Direction: $direction"
@@ -278,16 +287,20 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
 
         setStartButton?.setOnClickListener {
-            gridMap?.enableCarPlacement()
-            // Fade/unfade buttons like you do for obstacles and edit/drag modes
-            val placing = gridMap?.isPlacingCar() == true
-            setStartButton?.alpha = if (placing) 0.5f else 1.0f
+            val currentlyPlacing = gridMap?.isPlacingCar() == true
+            if (currentlyPlacing) {
+                gridMap?.disableCarPlacement()
+            } else {
+                gridMap?.enableCarPlacement()
+                // turn off other modes
+                editObstacleToggle?.isChecked = false
+                dragObstacleToggle?.isChecked = false
+                isObstaclePlacementActive = false
+                obstacleIcon?.alpha = 1.0f
+            }
 
-            // turn off other modes
-            editObstacleToggle?.isChecked = false
-            dragObstacleToggle?.isChecked = false
-            isObstaclePlacementActive = false
-            obstacleIcon?.alpha = 1.0f
+            val nowPlacing = gridMap?.isPlacingCar() == true
+            setStartButton?.alpha = if (nowPlacing) 0.5f else 1.0f
         }
 
 
@@ -309,6 +322,13 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 // toggle off edit
                 if (editObstacleToggle?.isChecked == true) editObstacleToggle?.isChecked = false
                 android.widget.Toast.makeText(this, "drag obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+
+                // Turn OFF car placement if active
+                if (gridMap?.isPlacingCar() == true) {
+                    gridMap?.disableCarPlacement()
+                }
+                setStartButton?.alpha = 1.0f
+
             } else {
                 gridMap?.setDragMode(false)
                 android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
@@ -383,19 +403,19 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
     fun updateRobotStatus(status: String) {
         runOnUiThread {
-            robotStatusText.text = "Status: $status"
+            robotStatusText?.text = "Status: $status"
         }
     }
 
     fun updateCoordinatesStatus(x: Int, y: Int) {
         runOnUiThread {
-            coordinatesStatusText.text = "Coordinates: ($x, $y)"
+            coordinatesStatusText?.text = "Coordinates: ($x, $y)"
         }
     }
 
     fun updateDirectionStatus(direction: String) {
         runOnUiThread {
-            directionStatusText.text = "Direction: $direction"
+            directionStatusText?.text = "Direction: $direction"
         }
     }
 
