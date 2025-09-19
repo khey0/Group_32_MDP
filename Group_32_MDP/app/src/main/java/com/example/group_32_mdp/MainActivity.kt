@@ -115,6 +115,9 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                             Log.w("GridMap", "Unexpected ROBOT format: $msg")
                         }
                     }
+                    if (msg.contentEquals("Task1Start")){
+                        robotStatusText!!.text= "Task 1 Start"
+                    }
 
 
 
