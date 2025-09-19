@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
@@ -166,6 +167,7 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        checkBluetoothPermissions()
 
         // Initialize GridMap view
         gridMap = findViewById(R.id.gridMap)
@@ -424,6 +426,32 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             directionStatusText?.text = "Direction: $direction"
         }
     }
+
+    private val REQUESTBLUETOOTHPERMISSIONS = 100
+
+    private fun checkBluetoothPermissions() {
+        if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT),
+                REQUESTBLUETOOTHPERMISSIONS
+            )
+        }
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUESTBLUETOOTHPERMISSIONS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Bluetooth permission granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Bluetooth permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
 
 }
