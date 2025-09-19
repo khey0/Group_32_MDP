@@ -118,6 +118,9 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                     if (msg.contentEquals("Task1Start")){
                         robotStatusText!!.text= "Task 1 Start"
                     }
+                    if (msg.contentEquals("Task1End")){
+                        robotStatusText!!.text= "Task 1 End"
+                    }
 
 
 
