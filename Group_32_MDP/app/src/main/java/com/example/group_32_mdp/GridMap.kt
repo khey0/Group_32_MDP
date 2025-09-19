@@ -96,14 +96,14 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun addObstacle(x: Int, y: Int): Obstacle {
         val obstacle = Obstacle(nextObstacleId++, x, y)
-        GridData.setObstacle(x, y, obstacle.id, obstacle.direction)
+        GridData.setObstacle(x, y, obstacle.id, obstacle.direction, obstacle.targetId)
         obstacleListener?.onObstacleCreated(obstacle)
         invalidate()
         return obstacle
     }
 
     fun updateObstacle(obstacle: Obstacle) {
-        GridData.setObstacle(obstacle.x, obstacle.y, obstacle.id, obstacle.direction)
+        GridData.setObstacle(obstacle.x, obstacle.y, obstacle.id, obstacle.direction, obstacle.targetId)
         obstacleListener?.onObstacleCreated(obstacle)
         invalidate()
     }
@@ -234,6 +234,16 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     val textX = left + cellSize / 2f
                     val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
                     canvas.drawText(cell.obstacleId.toString(), textX, textY, obstacleTextPaint)
+                    
+                    // Draw target ID if available (larger, white text)
+                    if (cell.targetId != null) {
+                        val targetTextPaint = Paint(obstacleTextPaint)
+                        targetTextPaint.textSize = 14f * scaledDensity // Larger text for target ID
+                        targetTextPaint.color = Color.WHITE
+                        val targetTextX = left + cellSize / 2f
+                        val targetTextY = top + cellSize / 2f - obstacleTextPaint.textSize / 2f
+                        canvas.drawText(cell.targetId.toString(), targetTextX, targetTextY, targetTextPaint)
+                    }
 
                     // Draw direction indicator (yellow border on the specified side)
                     drawDirectionIndicator(canvas, cell.direction, left, top, right, bottom)
@@ -257,6 +267,16 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             val textX = left + cellSize / 2f
             val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
             canvas.drawText(draggedObstacle!!.id.toString(), textX, textY, obstacleTextPaint)
+            
+            // Draw target ID if available
+            if (draggedObstacle!!.targetId != null) {
+                val targetTextPaint = Paint(obstacleTextPaint)
+                targetTextPaint.textSize = 14f * scaledDensity
+                targetTextPaint.color = Color.WHITE
+                val targetTextX = left + cellSize / 2f
+                val targetTextY = top + cellSize / 2f - obstacleTextPaint.textSize / 2f
+                canvas.drawText(draggedObstacle!!.targetId.toString(), targetTextX, targetTextY, targetTextPaint)
+            }
 
             // Draw direction indicator
             drawDirectionIndicator(canvas, draggedObstacle!!.direction, left, top, right, bottom)
@@ -397,7 +417,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     if (GridData.hasObstacleAt(gridX, gridY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
                         val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        draggedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                        val targetId = GridData.getTargetIdAt(gridX, gridY)
+                        draggedObstacle = Obstacle(obstacleId, gridX, gridY, direction, targetId)
                         isDragging = true
                         dragTouchX = x
                         dragTouchY = y
@@ -409,7 +430,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     if (GridData.hasObstacleAt(gridX, gridY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
                         val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        selectedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                        val targetId = GridData.getTargetIdAt(gridX, gridY)
+                        selectedObstacle = Obstacle(obstacleId, gridX, gridY, direction, targetId)
                         obstacleListener?.onObstacleEditRequested(selectedObstacle!!)
                     }
                     return selectedObstacle != null

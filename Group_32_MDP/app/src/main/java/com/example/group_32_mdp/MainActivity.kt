@@ -121,6 +121,29 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                     if (msg.contentEquals("Task1End")){
                         robotStatusText!!.text= "Task 1 End"
                     }
+                    
+                    // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>"
+                    if (msg.startsWith("TARGET")) {
+                        val parts = msg.split(",")
+                        if (parts.size == 3) {
+                            try {
+                                val obstacleNumber = parts[1].trim().toInt()
+                                val targetId = parts[2].trim().toInt()
+                                
+                                // Set target ID for the obstacle
+                                GridData.setTargetIdForObstacle(obstacleNumber, targetId)
+                                
+                                // Refresh the grid display
+                                gridMap?.invalidate()
+                                
+                                Log.d("MainActivity", "Set target ID $targetId for obstacle $obstacleNumber")
+                            } catch (e: Exception) {
+                                Log.w("MainActivity", "Invalid TARGET message: $msg", e)
+                            }
+                        } else {
+                            Log.w("MainActivity", "Unexpected TARGET format: $msg")
+                        }
+                    }
 
 
 
