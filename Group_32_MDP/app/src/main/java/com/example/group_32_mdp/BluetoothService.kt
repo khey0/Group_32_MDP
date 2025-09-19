@@ -243,6 +243,7 @@ class BluetoothService : Service() {
     }
 
 
+
     @Throws(Exception::class)
     private fun createFallbackSocket(device: BluetoothDevice): BluetoothSocket? {
         return device.javaClass
