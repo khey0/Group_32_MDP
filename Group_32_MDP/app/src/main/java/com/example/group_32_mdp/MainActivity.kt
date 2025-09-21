@@ -11,9 +11,11 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Chronometer
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.EditText
@@ -41,11 +43,21 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var bluetoothBtn: Button? = null
     private var gridMap: GridMap? = null  // Reference to GridMap
 
+    //Task buttons and timer variables
+    private var task1Button: Button? = null
+    private var task2Button: Button? = null
+    private lateinit var task1Chronometer: Chronometer
+    private lateinit var task2Chronometer: Chronometer
+    private var task1Running = false
+    private var task2Running = false
+
+
     // Obstacle controls
     private var obstacleIcon: ImageView? = null
     private var editObstacleToggle: Switch? = null
     private var dragObstacleToggle: Switch? = null
     private var isObstaclePlacementActive: Boolean = false
+    private var sendObstacleInfoButton: Button? = null
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -54,6 +66,8 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var blButton: ImageButton? = null
     private var bButton: ImageButton? = null
     private var brButton: ImageButton? = null
+
+
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         // Binds BluetoothService methods to MainActivity for us to call its methods
@@ -115,12 +129,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                         } else {
                             Log.w("GridMap", "Unexpected ROBOT format: $msg")
                         }
-                    }
-                    if (msg.contentEquals("Task1Start")){
-                        robotStatusText!!.text= "Task 1 Start"
-                    }
-                    if (msg.contentEquals("Task1End")){
-                        robotStatusText!!.text= "Task 1 End"
                     }
                     
                     // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>"
@@ -223,6 +231,15 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         obstacleIcon = findViewById(R.id.obstacleIcon)
         editObstacleToggle = findViewById(R.id.editObstacleToggle)
         dragObstacleToggle = findViewById(R.id.dragObstacleToggle)
+        sendObstacleInfoButton = findViewById(R.id.sendObstacleInfoButton)
+
+        //Initialize Task buttons and timers
+        task1Button = findViewById(R.id.task1Button)
+        task2Button = findViewById(R.id.task2Button)
+        task1Chronometer = findViewById(R.id.task1Chronometer)
+        task2Chronometer = findViewById(R.id.task2Chronometer)
+
+
 
         // Start service (binding happens in onStart)
         val serviceIntent = Intent(this, BluetoothService::class.java)
@@ -363,6 +380,48 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             } else {
                 gridMap?.setDragMode(false)
                 android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        sendObstacleInfoButton?.setOnClickListener {
+            if (isBound && bluetoothService != null) {
+                // Get formatted obstacle string
+                val obstacleData = GridData.getObstaclesFormattedString()
+
+                // Send via your Bluetooth service
+                bluetoothService!!.sendMessage(obstacleData)
+            }
+        }
+
+        // Task 1 timer button
+        task1Button?.setOnClickListener {
+            if (!task1Running) {
+                task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                task1Chronometer.start()
+                task1Running = true
+                task1Button!!.text = "Stop Task 1"
+                robotStatusText?.text = "Task 1 Stopped"
+            } else {
+                task1Chronometer.stop()
+                task1Running = false
+                task1Button!!.text = "Start Task 1"
+                robotStatusText?.text = "Task 1 Started"
+            }
+        }
+
+        // Task 2 button
+        task2Button?.setOnClickListener {
+            if (!task2Running) {
+                task2Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                task2Chronometer.start()
+                task2Running = true
+                task2Button!!.text = "Stop Task 2"
+                robotStatusText?.text = "Task 2 Stopped"
+            } else {
+                task2Chronometer.stop()
+                task2Running = false
+                task2Button!!.text = "Start Task 2"
+                robotStatusText?.text = "Task 2 Started"
             }
         }
     }

@@ -298,4 +298,15 @@ object GridData {
         }
         println("==================")
     }
+    /**
+     * Get all obstacles details in a string format
+     */
+    fun getObstaclesFormattedString(): String {
+        val obstacles = getAllObstacles()
+        val formatted = obstacles.joinToString(separator = ";") { obs ->
+            "${obs.x},${obs.y},${obs.direction.name[0]},${obs.id}"
+        }
+        return "ALG:$formatted;"
+    }
+
 }
