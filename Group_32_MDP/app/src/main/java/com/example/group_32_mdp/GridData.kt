@@ -303,10 +303,16 @@ object GridData {
      */
     fun getObstaclesFormattedString(): String {
         val obstacles = getAllObstacles()
+        val maxYIndex = grid.size - 1  // 19 for a 20x20 grid; keeps it flexible
+
+        // Convert internal (top-left origin) y -> external (bottom-left origin) y
         val formatted = obstacles.joinToString(separator = ";") { obs ->
-            "${obs.x},${obs.y},${obs.direction.name[0]},${obs.id}"
+            val displayY = maxYIndex - obs.y
+            "${obs.x},${displayY},${obs.direction.name[0]},${obs.id}"
         }
+
         return "ALG:$formatted;"
     }
+
 
 }
