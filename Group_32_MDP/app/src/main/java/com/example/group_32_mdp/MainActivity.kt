@@ -28,6 +28,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.appcompat.app.AlertDialog
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, EditObstacleDialog.OnObstacleUpdatedListener {
 
@@ -151,6 +153,41 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                             }
                         } else {
                             Log.w("MainActivity", "Unexpected TARGET format: $msg")
+                        }
+                    }
+
+                    // === JSON handler ===
+                    if (msg.trim().startsWith("{") || msg.trim().startsWith("[")) {
+                        try {
+                            val detections = JSONArray(msg) // your JSON is an array of 5 objects
+                            val collectedIds = mutableListOf<String>()
+
+                            for (i in 0 until detections.length()) {
+                                val obj: JSONObject = detections.getJSONObject(i)
+                                val classIds = obj.getJSONArray("class_ids")
+
+                                if (classIds.length() > 0) {
+                                    // Collect all values (usually one per object, but we’ll loop just in case)
+                                    for (j in 0 until classIds.length()) {
+                                        collectedIds.add(classIds.getString(j))
+                                    }
+                                }
+                            }
+
+                            if (collectedIds.isNotEmpty()) {
+                                // Count frequencies
+                                val mostFrequent = collectedIds.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+
+                                Log.d("MainActivity", "Class IDs found: $collectedIds, Most frequent: $mostFrequent")
+
+                                // TODO: Do something with `mostFrequent`
+                                msgTxt.append("\nMost frequent ID: $mostFrequent")
+                            } else {
+                                Log.d("MainActivity", "No valid class_ids in JSON")
+                            }
+
+                        } catch (e: Exception) {
+                            Log.w("MainActivity", "Failed to parse JSON: $msg", e)
                         }
                     }
 
