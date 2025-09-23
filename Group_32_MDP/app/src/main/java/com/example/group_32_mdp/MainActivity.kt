@@ -437,12 +437,12 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 task1Chronometer.start()
                 task1Running = true
                 task1Button!!.text = "Stop Task 1"
-                robotStatusText?.text = "Task 1 Stopped"
+                robotStatusText?.text = "Task 1 Started"
             } else {
                 task1Chronometer.stop()
                 task1Running = false
                 task1Button!!.text = "Start Task 1"
-                robotStatusText?.text = "Task 1 Started"
+                robotStatusText?.text = "Task 1 Stopped"
             }
         }
 
@@ -453,12 +453,12 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 task2Chronometer.start()
                 task2Running = true
                 task2Button!!.text = "Stop Task 2"
-                robotStatusText?.text = "Task 2 Stopped"
+                robotStatusText?.text = "Task 2 Started"
             } else {
                 task2Chronometer.stop()
                 task2Running = false
                 task2Button!!.text = "Start Task 2"
-                robotStatusText?.text = "Task 2 Started"
+                robotStatusText?.text = "Task 2 Stopped"
             }
         }
     }

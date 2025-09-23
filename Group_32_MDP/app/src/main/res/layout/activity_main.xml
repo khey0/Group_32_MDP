@@ -14,8 +14,8 @@
     <!-- GridMap -->
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="383dp"
-        android:layout_height="308dp"
+        android:layout_width="359dp"
+        android:layout_height="295dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/border_black"
         android:orientation="vertical"
