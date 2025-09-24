@@ -90,11 +90,13 @@
 
 
     <!-- Start Controls (new block) -->
+
+    <!-- Obstacle Controls -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/start_controls"
         android:layout_width="323dp"
         android:layout_height="213dp"
-        android:layout_marginStart="28dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/gridMap">
@@ -174,7 +176,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Obstacle Controls -->
     <LinearLayout
         android:id="@+id/obstacle_controls"
         android:layout_width="wrap_content"

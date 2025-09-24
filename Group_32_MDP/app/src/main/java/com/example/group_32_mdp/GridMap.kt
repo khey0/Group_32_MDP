@@ -1,6 +1,9 @@
 package com.example.group_32_mdp
 
 import android.content.Context
+import android.content.IntentFilter
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import android.content.BroadcastReceiver
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -53,6 +56,13 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private var setStartButton: Button? = null
     private var carBitmap: Bitmap? = null
 
+    // Arrow/stop icons
+    private val arrowUp by lazy { BitmapFactory.decodeResource(resources, R.drawable.arrow_up) }
+    private val arrowDown by lazy { BitmapFactory.decodeResource(resources, R.drawable.arrow_down) }
+    private val arrowRight by lazy { BitmapFactory.decodeResource(resources, R.drawable.arrow_right) }
+    private val arrowLeft by lazy { BitmapFactory.decodeResource(resources, R.drawable.arrow_left) }
+    private val stopIcon by lazy { BitmapFactory.decodeResource(resources, R.drawable.stop_icon) }
+
     // Grid origin coordinates
     private var originX: Float = 0f
     private var originY: Float = 0f
@@ -62,6 +72,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         fun onObstacleCreated(obstacle: Obstacle)
         fun onObstacleMoved(obstacle: Obstacle)
         fun onObstacleEditRequested(obstacle: Obstacle)
+        fun onObstacleRemoved(obstacle: Obstacle)
     }
 
     private var obstacleListener: ObstacleInteractionListener? = null
@@ -222,18 +233,38 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     if (isDragging && draggedObstacle != null && draggedObstacle!!.x == x && draggedObstacle!!.y == y) {
                         continue
                     }
+                    // Convert from bottom-up coordinate system to top-down drawing system
+                    val drawY = ROW - 1 - y
                     val left = originX + x * cellSize
-                    val top = originY + y * cellSize
+                    val top = originY + drawY * cellSize
                     val right = left + cellSize
                     val bottom = top + cellSize
 
                     // Draw obstacle (black square)
                     canvas.drawRect(left, top, right, bottom, obstaclePaint)
 
-                    // Draw obstacle number
+                    // Draw obstacle label/target if present
                     val textX = left + cellSize / 2f
                     val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
-                    canvas.drawText(cell.obstacleId.toString(), textX, textY, obstacleTextPaint)
+
+                    val targetId = TargetAssignments.getTargetId(cell.obstacleId)
+                    val label = targetId?.let { ObstacleCatalog.idToLabel[it] }
+
+                    if (label == "UP") {
+                        drawCenteredBitmap(canvas, arrowUp, left, top)
+                    } else if (label == "DOWN") {
+                        drawCenteredBitmap(canvas, arrowDown, left, top)
+                    } else if (label == "RIGHT") {
+                        drawCenteredBitmap(canvas, arrowRight, left, top)
+                    } else if (label == "LEFT") {
+                        drawCenteredBitmap(canvas, arrowLeft, left, top)
+                    } else if (label == "STOP") {
+                        drawCenteredBitmap(canvas, stopIcon, left, top)
+                    } else {
+                        // Default: show label (A..Z or 1..9) in white on black
+                        val textToDraw = label ?: cell.obstacleId.toString()
+                        canvas.drawText(textToDraw, textX, textY, obstacleTextPaint)
+                    }
 
                     // Draw direction indicator (yellow border on the specified side)
                     drawDirectionIndicator(canvas, cell.direction, left, top, right, bottom)
@@ -261,6 +292,15 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             // Draw direction indicator
             drawDirectionIndicator(canvas, draggedObstacle!!.direction, left, top, right, bottom)
         }
+    }
+
+    private fun drawCenteredBitmap(canvas: Canvas, bitmap: Bitmap, left: Float, top: Float) {
+        val destWidth = cellSize * 0.8f
+        val destHeight = cellSize * 0.8f
+        val scaled = Bitmap.createScaledBitmap(bitmap, destWidth.toInt(), destHeight.toInt(), true)
+        val dx = left + (cellSize - destWidth) / 2f
+        val dy = top + (cellSize - destHeight) / 2f
+        canvas.drawBitmap(scaled, dx, dy, null)
     }
 
     private fun drawCar(canvas: Canvas) {
@@ -387,17 +427,21 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (isObstacleMode) {
+                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
+                    val flippedY = ROW - 1 - gridY
                     // Check if there's already an obstacle at this position
-                    if (!GridData.hasObstacleAt(gridX, gridY)) {
-                        addObstacle(gridX, gridY)
+                    if (!GridData.hasObstacleAt(gridX, flippedY)) {
+                        addObstacle(gridX, flippedY)
                     }
                     return true
                 } else if (isDragMode) {
+                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
+                    val flippedY = ROW - 1 - gridY
                     // Find obstacle at this position
-                    if (GridData.hasObstacleAt(gridX, gridY)) {
-                        val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
-                        val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        draggedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                    if (GridData.hasObstacleAt(gridX, flippedY)) {
+                        val obstacleId = GridData.getObstacleIdAt(gridX, flippedY)
+                        val direction = GridData.getObstacleDirectionAt(gridX, flippedY) ?: Direction.NORTH
+                        draggedObstacle = Obstacle(obstacleId, gridX, flippedY, direction)
                         isDragging = true
                         dragTouchX = x
                         dragTouchY = y
@@ -405,11 +449,13 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     }
                     return draggedObstacle != null
                 } else if (isEditMode) {
+                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
+                    val flippedY = ROW - 1 - gridY
                     // Find obstacle at this position for editing
-                    if (GridData.hasObstacleAt(gridX, gridY)) {
-                        val obstacleId = GridData.getObstacleIdAt(gridX, gridY)
-                        val direction = GridData.getObstacleDirectionAt(gridX, gridY) ?: Direction.NORTH
-                        selectedObstacle = Obstacle(obstacleId, gridX, gridY, direction)
+                    if (GridData.hasObstacleAt(gridX, flippedY)) {
+                        val obstacleId = GridData.getObstacleIdAt(gridX, flippedY)
+                        val direction = GridData.getObstacleDirectionAt(gridX, flippedY) ?: Direction.NORTH
+                        selectedObstacle = Obstacle(obstacleId, gridX, flippedY, direction)
                         obstacleListener?.onObstacleEditRequested(selectedObstacle!!)
                     }
                     return selectedObstacle != null
@@ -452,21 +498,24 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     var movedSuccessfully = false
                     // If drop is inside grid, try to move
                     if (dropGridX in 0 until COL && dropGridY in 0 until ROW) {
-                        if (!GridData.hasObstacleAt(dropGridX, dropGridY)) {
+                        // Convert drop coordinates to bottom-up system
+                        val flippedDropY = ROW - 1 - dropGridY
+                        if (!GridData.hasObstacleAt(dropGridX, flippedDropY)) {
                             movedSuccessfully = GridData.moveObstacle(
                                 originalX,
                                 originalY,
                                 dropGridX,
-                                dropGridY
+                                flippedDropY
                             )
                             if (movedSuccessfully) {
-                                val updatedObstacle = draggedObstacle!!.copy(x = dropGridX, y = dropGridY)
+                                val updatedObstacle = draggedObstacle!!.copy(x = dropGridX, y = flippedDropY)
                                 obstacleListener?.onObstacleMoved(updatedObstacle)
                             }
                         }
                     } else {
                         // Dropped outside grid: delete the obstacle
                         GridData.removeObstacle(originalX, originalY)
+                        obstacleListener?.onObstacleRemoved(draggedObstacle!!)
                     }
 
                     draggedObstacle = null
@@ -517,5 +566,24 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         directionPaint.color = Color.YELLOW
         directionPaint.style = Paint.Style.STROKE
         directionPaint.isAntiAlias = true
+    }
+
+    // Listen for C9 target updates to refresh the grid immediately
+    private val c9Receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: android.content.Intent?) {
+            if (intent?.action == "C9_TARGET_UPDATED") {
+                invalidate()
+            }
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        LocalBroadcastManager.getInstance(context).registerReceiver(c9Receiver, IntentFilter("C9_TARGET_UPDATED"))
+    }
+
+    override fun onDetachedFromWindow() {
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(c9Receiver)
+        super.onDetachedFromWindow()
     }
 }

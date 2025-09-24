@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
 import java.util.UUID
 import java.util.function.Function
@@ -151,6 +152,14 @@ class BluetoothActivity : AppCompatActivity() {
                 Toast.makeText(this, "Disconnected", Toast.LENGTH_SHORT).show()
             }
         })
+
+        // Listen for messages coming from BluetoothService (C9 feed)
+        LocalBroadcastManager.getInstance(this).registerReceiver(object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val msg = intent.getStringExtra("message") ?: return
+                handleIncomingLine(msg)
+            }
+        }, IntentFilter("BLUETOOTH_MESSAGE"))
     }
 
     private fun showPairedDevices() {
@@ -456,5 +465,30 @@ class BluetoothActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1
 
+    }
+
+    // Parses lines like: TARGET,4,11
+    private fun handleIncomingLine(line: String) {
+        val text = line.trim()
+        val parts = text.split(",").map { it.trim() }
+        if (parts.isEmpty()) return
+
+        when (parts[0].uppercase()) {
+            "TARGET" -> {
+                if (parts.size >= 3) {
+                    val obstacleNo = parts[1].toIntOrNull()
+                    val targetId = parts[2].toIntOrNull()
+                    if (obstacleNo != null && targetId != null) {
+                        TargetAssignments.setTarget(obstacleNo, targetId)
+                        Log.d("C9", "TARGET received -> obstacle=$obstacleNo targetId=$targetId")
+                        // Notify UI components (e.g., GridMap) to refresh
+                        val intent = Intent("C9_TARGET_UPDATED")
+                        intent.putExtra("obstacle", obstacleNo)
+                        intent.putExtra("targetId", targetId)
+                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    }
+                }
+            }
+        }
     }
 }

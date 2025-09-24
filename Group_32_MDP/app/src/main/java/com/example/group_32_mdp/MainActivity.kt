@@ -402,6 +402,14 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         sendObstacleData(obstacle)
     }
 
+    override fun onObstacleRemoved(obstacle: Obstacle) {
+        // Send obstacle removal message via Bluetooth
+        if (isBound && bluetoothService != null) {
+            val message = "REMOVE_OBSTACLE,${obstacle.id}"
+            bluetoothService?.sendMessage(message)
+        }
+    }
+
     private fun sendObstacleData(obstacle: Obstacle) {
         if (isBound && bluetoothService != null) {
             val message = "OBSTACLE,${obstacle.id},${obstacle.x},${obstacle.y},${obstacle.direction.name}"

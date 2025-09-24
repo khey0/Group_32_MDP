@@ -52,10 +52,10 @@ class EditObstacleDialog : DialogFragment() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         directionSpinner.adapter = adapter
 
-        // Set current values (display Y as bottom-up: 0 at bottom, 19 at top)
+        // Set current values (Y is now bottom-up: 0 at bottom, 19 at top)
         obstacle?.let { obs ->
             xCoordinateEdit.setText(obs.x.toString())
-            yCoordinateEdit.setText((19 - obs.y).toString())
+            yCoordinateEdit.setText(obs.y.toString())
             
             val directionIndex = directions.indexOf(obs.direction.name)
             if (directionIndex >= 0) {
@@ -69,10 +69,7 @@ class EditObstacleDialog : DialogFragment() {
 
         saveButton.setOnClickListener {
             val newX = xCoordinateEdit.text.toString().toIntOrNull() ?: obstacle?.x ?: 0
-            // Convert displayed bottom-up Y to internal top-down Y
-            val enteredYBottomUp = yCoordinateEdit.text.toString().toIntOrNull()
-                ?: (obstacle?.let { 19 - it.y } ?: 0)
-            val newY = 19 - enteredYBottomUp
+            val newY = yCoordinateEdit.text.toString().toIntOrNull() ?: obstacle?.y ?: 0
             val newDirection = Direction.valueOf(directions[directionSpinner.selectedItemPosition])
 
             obstacle?.let { obs ->
