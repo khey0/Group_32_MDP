@@ -155,8 +155,14 @@ class BluetoothService : Service() {
                     }
                     socket = null
                 }
-                // First attempt: normal UUID-based connection
-                socket = device.createRfcommSocketToServiceRecord(uuid)
+                socket = if (device.address == "AA:AA:AA:AA:AA:AA") {
+                    // RPi special case → use reflection on port 1
+                    val m = device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                    m.invoke(device, 1) as BluetoothSocket
+                } else {
+                    // Default case → use UUID-based socket (works with Android Module Tool, others)
+                    device.createRfcommSocketToServiceRecord(uuid)
+                }
                 BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
                 socket!!.connect()
             } catch (e: IOException) {

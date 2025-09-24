@@ -11,9 +11,11 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.Chronometer
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.EditText
@@ -26,6 +28,8 @@ import androidx.fragment.app.FragmentManager
 import androidx.appcompat.app.AlertDialog
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, EditObstacleDialog.OnObstacleUpdatedListener {
 
@@ -41,11 +45,21 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var bluetoothBtn: Button? = null
     private var gridMap: GridMap? = null  // Reference to GridMap
 
+    //Task buttons and timer variables
+    private var task1Button: Button? = null
+    private var task2Button: Button? = null
+    private lateinit var task1Chronometer: Chronometer
+    private lateinit var task2Chronometer: Chronometer
+    private var task1Running = false
+    private var task2Running = false
+
+
     // Obstacle controls
     private var obstacleIcon: ImageView? = null
     private var editObstacleToggle: Switch? = null
     private var dragObstacleToggle: Switch? = null
     private var isObstaclePlacementActive: Boolean = false
+    private var sendObstacleInfoButton: Button? = null
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -54,6 +68,8 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var blButton: ImageButton? = null
     private var bButton: ImageButton? = null
     private var brButton: ImageButton? = null
+
+
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         // Binds BluetoothService methods to MainActivity for us to call its methods
@@ -116,11 +132,63 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                             Log.w("GridMap", "Unexpected ROBOT format: $msg")
                         }
                     }
-                    if (msg.contentEquals("Task1Start")){
-                        robotStatusText!!.text= "Task 1 Start"
+                    
+                    // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>"
+                    if (msg.startsWith("TARGET")) {
+                        val parts = msg.split(",")
+                        if (parts.size == 3) {
+                            try {
+                                val obstacleNumber = parts[1].trim().toInt()
+                                val targetId = parts[2].trim().toInt()
+                                
+                                // Set target ID for the obstacle
+                                GridData.setTargetIdForObstacle(obstacleNumber, targetId)
+                                
+                                // Refresh the grid display
+                                gridMap?.invalidate()
+                                
+                                Log.d("MainActivity", "Set target ID $targetId for obstacle $obstacleNumber")
+                            } catch (e: Exception) {
+                                Log.w("MainActivity", "Invalid TARGET message: $msg", e)
+                            }
+                        } else {
+                            Log.w("MainActivity", "Unexpected TARGET format: $msg")
+                        }
                     }
-                    if (msg.contentEquals("Task1End")){
-                        robotStatusText!!.text= "Task 1 End"
+
+                    // === JSON handler ===
+                    if (msg.trim().startsWith("{") || msg.trim().startsWith("[")) {
+                        try {
+                            val detections = JSONArray(msg) // your JSON is an array of 5 objects
+                            val collectedIds = mutableListOf<String>()
+
+                            for (i in 0 until detections.length()) {
+                                val obj: JSONObject = detections.getJSONObject(i)
+                                val classIds = obj.getJSONArray("class_ids")
+
+                                if (classIds.length() > 0) {
+                                    // Collect all values (usually one per object, but we’ll loop just in case)
+                                    for (j in 0 until classIds.length()) {
+                                        collectedIds.add(classIds.getString(j))
+                                    }
+                                }
+                            }
+
+                            if (collectedIds.isNotEmpty()) {
+                                // Count frequencies
+                                val mostFrequent = collectedIds.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
+
+                                Log.d("MainActivity", "Class IDs found: $collectedIds, Most frequent: $mostFrequent")
+
+                                // TODO: Do something with `mostFrequent`
+                                msgTxt.append("\nMost frequent ID: $mostFrequent")
+                            } else {
+                                Log.d("MainActivity", "No valid class_ids in JSON")
+                            }
+
+                        } catch (e: Exception) {
+                            Log.w("MainActivity", "Failed to parse JSON: $msg", e)
+                        }
                     }
 
 
@@ -200,6 +268,15 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         obstacleIcon = findViewById(R.id.obstacleIcon)
         editObstacleToggle = findViewById(R.id.editObstacleToggle)
         dragObstacleToggle = findViewById(R.id.dragObstacleToggle)
+        sendObstacleInfoButton = findViewById(R.id.sendObstacleInfoButton)
+
+        //Initialize Task buttons and timers
+        task1Button = findViewById(R.id.task1Button)
+        task2Button = findViewById(R.id.task2Button)
+        task1Chronometer = findViewById(R.id.task1Chronometer)
+        task2Chronometer = findViewById(R.id.task2Chronometer)
+
+
 
         // Start service (binding happens in onStart)
         val serviceIntent = Intent(this, BluetoothService::class.java)
@@ -340,6 +417,48 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             } else {
                 gridMap?.setDragMode(false)
                 android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        sendObstacleInfoButton?.setOnClickListener {
+            if (isBound && bluetoothService != null) {
+                // Get formatted obstacle string
+                val obstacleData = GridData.getObstaclesFormattedString()
+
+                // Send via your Bluetooth service
+                bluetoothService!!.sendMessage(obstacleData)
+            }
+        }
+
+        // Task 1 timer button
+        task1Button?.setOnClickListener {
+            if (!task1Running) {
+                task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                task1Chronometer.start()
+                task1Running = true
+                task1Button!!.text = "Stop Task 1"
+                robotStatusText?.text = "Task 1 Started"
+            } else {
+                task1Chronometer.stop()
+                task1Running = false
+                task1Button!!.text = "Start Task 1"
+                robotStatusText?.text = "Task 1 Stopped"
+            }
+        }
+
+        // Task 2 button
+        task2Button?.setOnClickListener {
+            if (!task2Running) {
+                task2Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                task2Chronometer.start()
+                task2Running = true
+                task2Button!!.text = "Stop Task 2"
+                robotStatusText?.text = "Task 2 Started"
+            } else {
+                task2Chronometer.stop()
+                task2Running = false
+                task2Button!!.text = "Start Task 2"
+                robotStatusText?.text = "Task 2 Stopped"
             }
         }
     }

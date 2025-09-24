@@ -14,8 +14,8 @@
     <!-- GridMap -->
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="383dp"
-        android:layout_height="308dp"
+        android:layout_width="347dp"
+        android:layout_height="289dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/border_black"
         android:orientation="vertical"
@@ -71,7 +71,7 @@
         <ScrollView
             android:id="@+id/msgScroll"
             android:layout_width="match_parent"
-            android:layout_height="159dp">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/msgTxt"
@@ -83,8 +83,9 @@
 
     <com.example.group_32_mdp.GridMap
         android:id="@+id/gridMap"
-        android:layout_width="770dp"
-        android:layout_height="607dp"
+        android:layout_width="566dp"
+        android:layout_height="563dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -94,12 +95,11 @@
     <!-- Obstacle Controls -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/start_controls"
-        android:layout_width="323dp"
-        android:layout_height="213dp"
-        android:layout_marginStart="32dp"
+        android:layout_width="155dp"
+        android:layout_height="145dp"
         android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/gridMap">
+        app:layout_constraintTop_toBottomOf="@+id/gridMap">
 
         <Button
             android:id="@+id/setStartButton"
@@ -174,8 +174,10 @@
                 app:layout_constraintTop_toBottomOf="@id/frButton"
                 app:srcCompat="@drawable/fr" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Obstacle Controls -->
     <LinearLayout
         android:id="@+id/obstacle_controls"
         android:layout_width="wrap_content"
@@ -237,8 +239,8 @@
 
     <LinearLayout
         android:id="@+id/robotStatusBox"
-        android:layout_width="212dp"
-        android:layout_height="163dp"
+        android:layout_width="153dp"
+        android:layout_height="142dp"
         android:orientation="vertical"
         android:padding="8dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -285,6 +287,57 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="X: 0, Y: 0" />
+    </LinearLayout>
+
+
+    <!-- Start task buttons and timer -->
+    <Button
+        android:id="@+id/sendObstacleInfoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Obstacle Information"
+        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls"
+        tools:layout_editor_absoluteX="9dp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="2dp"
+        app:layout_constraintStart_toEndOf="@+id/start_controls"
+        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+
+        <Chronometer
+            android:id="@+id/task1Chronometer"
+            android:layout_width="124dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/task1Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Task 1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="2dp"
+        app:layout_constraintStart_toEndOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+
+        <Chronometer
+            android:id="@+id/task2Chronometer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/task2Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Task 2" />
     </LinearLayout>
 
 

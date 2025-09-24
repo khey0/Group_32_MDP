@@ -9,7 +9,8 @@ import android.graphics.Bitmap
 data class GridCell(
     var hasObstacle: Boolean = false,
     var obstacleId: Int = -1,
-    var direction: Direction = Direction.NORTH
+    var direction: Direction = Direction.NORTH,
+    var targetId: Int? = null
 )
 
 /**
@@ -61,9 +62,9 @@ object GridData {
     /**
      * Set obstacle at specific coordinates
      */
-    fun setObstacle(x: Int, y: Int, obstacleId: Int, direction: Direction = Direction.NORTH) {
+    fun setObstacle(x: Int, y: Int, obstacleId: Int, direction: Direction = Direction.NORTH, targetId: Int? = null) {
         if (isValidCoordinate(x, y)) {
-            grid[y][x] = GridCell(true, obstacleId, direction)
+            grid[y][x] = GridCell(true, obstacleId, direction, targetId)
         }
     }
     
@@ -254,6 +255,32 @@ object GridData {
     }
     
     /**
+     * Set target ID for an obstacle by obstacle ID
+     */
+    fun setTargetIdForObstacle(obstacleId: Int, targetId: Int) {
+        for (y in 0..19) {
+            for (x in 0..19) {
+                val cell = grid[y][x]
+                if (cell.hasObstacle && cell.obstacleId == obstacleId) {
+                    grid[y][x] = cell.copy(targetId = targetId)
+                    return
+                }
+            }
+        }
+    }
+    
+    /**
+     * Get target ID for an obstacle at specific coordinates
+     */
+    fun getTargetIdAt(x: Int, y: Int): Int? {
+        return if (isValidCoordinate(x, y) && grid[y][x].hasObstacle) {
+            grid[y][x].targetId
+        } else {
+            null
+        }
+    }
+
+    /**
      * Print grid state for debugging
      */
     fun printGridState() {
@@ -271,4 +298,21 @@ object GridData {
         }
         println("==================")
     }
+    /**
+     * Get all obstacles details in a string format
+     */
+    fun getObstaclesFormattedString(): String {
+        val obstacles = getAllObstacles()
+        val maxYIndex = grid.size - 1  // 19 for a 20x20 grid; keeps it flexible
+
+        // Convert internal (top-left origin) y -> external (bottom-left origin) y
+        val formatted = obstacles.joinToString(separator = ";") { obs ->
+            val displayY = maxYIndex - obs.y
+            "${obs.x},${displayY},${obs.direction.name[0]},${obs.id}"
+        }
+
+        return "ALG:$formatted;"
+    }
+
+
 }

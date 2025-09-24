@@ -4,7 +4,8 @@ data class Obstacle(
     val id: Int,
     val x: Int,
     val y: Int,
-    val direction: Direction = Direction.NORTH
+    val direction: Direction = Direction.NORTH,
+    val targetId: Int? = null
 )
 
 enum class Direction {
