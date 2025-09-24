@@ -49,9 +49,7 @@ object GridData {
     fun isAreaClear(xRange: IntRange, yRange: IntRange): Boolean {
         return xRange.all { checkX ->
             yRange.all { checkY ->
-                // Flip Y to match grid array indexing (top-left origin)
-                val flippedY = 19 - checkY
-                val cell = getCell(checkX, flippedY)
+                val cell = getCell(checkX, checkY)
                 cell != null && !cell.hasObstacle
             }
         }
@@ -307,7 +305,7 @@ object GridData {
 
         // Convert internal (top-left origin) y -> external (bottom-left origin) y
         val formatted = obstacles.joinToString(separator = ";") { obs ->
-            val displayY = maxYIndex - obs.y
+            val displayY = obs.y
             "${obs.x},${displayY},${obs.direction.name[0]},${obs.id}"
         }
 
