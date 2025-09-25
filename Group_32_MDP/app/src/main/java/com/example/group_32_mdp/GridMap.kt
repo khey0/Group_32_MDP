@@ -41,7 +41,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val maxWidthFraction = 0.80f
 
     // Obstacle management
-    private var nextObstacleId = 1
     private var isObstacleMode = false
     private var isDragMode = false
     private var isEditMode = false
@@ -106,11 +105,31 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     fun addObstacle(x: Int, y: Int): Obstacle {
-        val obstacle = Obstacle(nextObstacleId++, x, y)
+        val obstacle = Obstacle(getNextAvailableId(), x, y)
         GridData.setObstacle(x, y, obstacle.id, obstacle.direction)
         obstacleListener?.onObstacleCreated(obstacle)
         invalidate()
         return obstacle
+    }
+    
+    private fun getNextAvailableId(): Int {
+        // Find the lowest available ID starting from 1
+        val existingIds = mutableSetOf<Int>()
+        for (y in 0 until ROW) {
+            for (x in 0 until COL) {
+                val cell = GridData.getCell(x, y)
+                if (cell?.hasObstacle == true) {
+                    existingIds.add(cell.obstacleId)
+                }
+            }
+        }
+        
+        // Find the first available ID starting from 1
+        var id = 1
+        while (existingIds.contains(id)) {
+            id++
+        }
+        return id
     }
 
     fun updateObstacle(obstacle: Obstacle) {
@@ -419,7 +438,53 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         val gridX = ((x - originX) / cellSize).toInt()
         val gridY = ((y - originY) / cellSize).toInt()
 
-        // Check if touch is within grid bounds
+        // For drag mode, we need to handle touches outside grid bounds
+        if (isDragMode && draggedObstacle != null) {
+            // Always handle drag events, even outside grid
+            when (event.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    dragTouchX = x
+                    dragTouchY = y
+                    invalidate()
+                    return true
+                }
+                MotionEvent.ACTION_UP -> {
+                    // Check if drop is inside grid
+                    if (gridX in 0 until COL && gridY in 0 until ROW) {
+                        // Convert drop coordinates to bottom-up system
+                        val flippedDropY = ROW - 1 - gridY
+                        val originalX = draggedObstacle!!.x
+                        val originalY = draggedObstacle!!.y
+                        
+                        if (!GridData.hasObstacleAt(gridX, flippedDropY)) {
+                            val movedSuccessfully = GridData.moveObstacle(
+                                originalX,
+                                originalY,
+                                gridX,
+                                flippedDropY
+                            )
+                            if (movedSuccessfully) {
+                                val updatedObstacle = draggedObstacle!!.copy(x = gridX, y = flippedDropY)
+                                obstacleListener?.onObstacleMoved(updatedObstacle)
+                            }
+                        }
+                    } else {
+                        // Dropped outside grid: delete the obstacle
+                        val originalX = draggedObstacle!!.x
+                        val originalY = draggedObstacle!!.y
+                        GridData.removeObstacle(originalX, originalY)
+                        obstacleListener?.onObstacleRemoved(draggedObstacle!!)
+                    }
+                    
+                    draggedObstacle = null
+                    isDragging = false
+                    invalidate()
+                    return true
+                }
+            }
+        }
+
+        // Check if touch is within grid bounds for other modes
         if (gridX < 0 || gridX >= COL || gridY < 0 || gridY >= ROW) {
             return false
         }
@@ -475,53 +540,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 } else {
                     // Not in placement mode → do nothing on touch
                     return false
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                if (isDragMode && draggedObstacle != null) {
-                    // Update floating position; relocate only on drop
-                    dragTouchX = x
-                    dragTouchY = y
-                    invalidate()
-                    return true
-                }
-            }
-            MotionEvent.ACTION_UP -> {
-                if (isDragMode && draggedObstacle != null) {
-                    // Recompute drop cell from release position
-                    val dropGridX = ((event.x - originX) / cellSize).toInt()
-                    val dropGridY = ((event.y - originY) / cellSize).toInt()
-
-                    val originalX = draggedObstacle!!.x
-                    val originalY = draggedObstacle!!.y
-
-                    var movedSuccessfully = false
-                    // If drop is inside grid, try to move
-                    if (dropGridX in 0 until COL && dropGridY in 0 until ROW) {
-                        // Convert drop coordinates to bottom-up system
-                        val flippedDropY = ROW - 1 - dropGridY
-                        if (!GridData.hasObstacleAt(dropGridX, flippedDropY)) {
-                            movedSuccessfully = GridData.moveObstacle(
-                                originalX,
-                                originalY,
-                                dropGridX,
-                                flippedDropY
-                            )
-                            if (movedSuccessfully) {
-                                val updatedObstacle = draggedObstacle!!.copy(x = dropGridX, y = flippedDropY)
-                                obstacleListener?.onObstacleMoved(updatedObstacle)
-                            }
-                        }
-                    } else {
-                        // Dropped outside grid: delete the obstacle
-                        GridData.removeObstacle(originalX, originalY)
-                        obstacleListener?.onObstacleRemoved(draggedObstacle!!)
-                    }
-
-                    draggedObstacle = null
-                    isDragging = false
-                    invalidate()
-                    return true
                 }
             }
         }
