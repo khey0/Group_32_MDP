@@ -14,8 +14,8 @@
     <!-- GridMap -->
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="347dp"
-        android:layout_height="289dp"
+        android:layout_width="340dp"
+        android:layout_height="209dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/border_black"
         android:orientation="vertical"
@@ -30,13 +30,13 @@
         <Button
             android:id="@+id/bluetoothUIButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:text="@string/connect_to_a_device" />
 
         <TextView
             android:id="@+id/statusText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="25dp"
             android:background="@android:color/white"
             android:padding="4dp"
             android:text="@string/not_connected"
@@ -81,18 +81,21 @@
         </ScrollView>
     </LinearLayout>
 
+
+    <!-- Start Controls (new block) -->
+
+    <!-- Obstacle Controls -->
+
+    <!-- Obstacle Controls -->
     <com.example.group_32_mdp.GridMap
         android:id="@+id/gridMap"
         android:layout_width="566dp"
         android:layout_height="563dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <!-- Start Controls (new block) -->
-
-    <!-- Obstacle Controls -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/start_controls"
         android:layout_width="155dp"
@@ -177,7 +180,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Obstacle Controls -->
     <LinearLayout
         android:id="@+id/obstacle_controls"
         android:layout_width="wrap_content"

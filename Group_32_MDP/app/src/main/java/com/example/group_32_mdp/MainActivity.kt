@@ -132,6 +132,10 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                             Log.w("GridMap", "Unexpected ROBOT format: $msg")
                         }
                     }
+
+                    if (msg.contentEquals("LFT")){
+                        robotStatusText!!.text = "Looking for target"
+                    }
                     
                     // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>"
                     if (msg.startsWith("TARGET")) {
