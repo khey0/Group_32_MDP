@@ -437,11 +437,19 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         // Task 1 timer button
         task1Button?.setOnClickListener {
             if (!task1Running) {
-                task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
-                task1Chronometer.start()
-                task1Running = true
-                task1Button!!.text = "Stop Task 1"
-                robotStatusText?.text = "Task 1 Started"
+                if (isBound && bluetoothService != null) {
+                    // Get formatted obstacle string
+                    val obstacleData = GridData.getObstaclesFormattedString()
+
+                    // Send via your Bluetooth service
+                    bluetoothService!!.sendMessage(obstacleData)
+
+                    task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                    task1Chronometer.start()
+                    task1Running = true
+                    task1Button!!.text = "Stop Task 1"
+                    robotStatusText?.text = "Task 1 Started"
+                }
             } else {
                 task1Chronometer.stop()
                 task1Running = false
