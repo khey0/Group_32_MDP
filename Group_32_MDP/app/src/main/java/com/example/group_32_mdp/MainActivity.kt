@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var editObstacleToggle: Switch? = null
     private var dragObstacleToggle: Switch? = null
     private var isObstaclePlacementActive: Boolean = false
-    private var sendObstacleInfoButton: Button? = null
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -274,7 +273,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         obstacleIcon = findViewById(R.id.obstacleIcon)
         editObstacleToggle = findViewById(R.id.editObstacleToggle)
         dragObstacleToggle = findViewById(R.id.dragObstacleToggle)
-        sendObstacleInfoButton = findViewById(R.id.sendObstacleInfoButton)
 
         //Initialize Task buttons and timers
         task1Button = findViewById(R.id.task1Button)
@@ -432,24 +430,22 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             }
         }
 
-        sendObstacleInfoButton?.setOnClickListener {
-            if (isBound && bluetoothService != null) {
-                // Get formatted obstacle string
-                val obstacleData = GridData.getObstaclesFormattedString()
-
-                // Send via your Bluetooth service
-                bluetoothService!!.sendMessage(obstacleData)
-            }
-        }
-
         // Task 1 timer button
         task1Button?.setOnClickListener {
             if (!task1Running) {
-                task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
-                task1Chronometer.start()
-                task1Running = true
-                task1Button!!.text = "Stop Task 1"
-                robotStatusText?.text = "Task 1 Started"
+                if (isBound && bluetoothService != null) {
+                    // Get formatted obstacle string
+                    val obstacleData = GridData.getObstaclesFormattedString()
+
+                    // Send via Bluetooth service
+                    bluetoothService!!.sendMessage(obstacleData)
+
+                    task1Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                    task1Chronometer.start()
+                    task1Running = true
+                    task1Button!!.text = "Stop Task 1"
+                    robotStatusText?.text = "Task 1 Started"
+                }
             } else {
                 task1Chronometer.stop()
                 task1Running = false
@@ -461,11 +457,20 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         // Task 2 button
         task2Button?.setOnClickListener {
             if (!task2Running) {
-                task2Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
-                task2Chronometer.start()
-                task2Running = true
-                task2Button!!.text = "Stop Task 2"
-                robotStatusText?.text = "Task 2 Started"
+
+                if (isBound && bluetoothService != null) {
+                    // Get formatted obstacle string
+                    val obstacleData = GridData.getObstaclesFormattedString()
+
+                    // Send via Bluetooth service
+                    bluetoothService!!.sendMessage("Task2Start")
+
+                    task2Chronometer.base = SystemClock.elapsedRealtime() // reset to 0
+                    task2Chronometer.start()
+                    task2Running = true
+                    task2Button!!.text = "Stop Task 2"
+                    robotStatusText?.text = "Task 2 Started"
+                }
             } else {
                 task2Chronometer.stop()
                 task2Running = false
