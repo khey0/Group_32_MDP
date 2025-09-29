@@ -67,6 +67,7 @@
                 android:fontFamily="@font/coda"
                 android:hint="@string/type_your_message"
                 android:inputType="text"
+                android:textColorHint="@color/colorWhite"
                 android:textColor="@color/colorWhite" />
 
             <Button
