@@ -26,14 +26,13 @@
     <!-- GridMap -->
     <LinearLayout
         android:id="@+id/bluetooth_layout"
-        android:layout_width="340dp"
-        android:layout_height="209dp"
+        android:layout_width="333dp"
+        android:layout_height="304dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintTop_toBottomOf="@+id/gridMap"
         app:layout_constraintVertical_bias="0.044">
 
@@ -95,7 +94,8 @@
                 android:id="@+id/msgTxt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="" />
+                android:text=""
+                android:textColor="@color/colorWhite" />
         </ScrollView>
     </LinearLayout>
 
@@ -108,7 +108,7 @@
     <ImageView
         android:id="@+id/f32Banner"
         android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_height="100dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
@@ -123,10 +123,9 @@
 
     <com.example.group_32_mdp.GridMap
         android:id="@+id/gridMap"
-        android:layout_width="576dp"
-        android:layout_height="573dp"
+        android:layout_width="427dp"
+        android:layout_height="436dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
         android:padding="0dp"
         app:layout_constraintBottom_toTopOf="@+id/start_controls"
         app:layout_constraintDimensionRatio="1:1"
@@ -222,9 +221,9 @@
 
     <LinearLayout
         android:id="@+id/obstacle_controls"
-        android:layout_width="264dp"
-        android:layout_height="104dp"
-        android:background="@drawable/border_black"
+        android:layout_width="240dp"
+        android:layout_height="83dp"
+        android:background="@drawable/bg_grey_black_border"
         android:orientation="horizontal"
         android:padding="8dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -285,10 +284,6 @@
 
     <LinearLayout
         android:id="@+id/robotStatusBox"
-        android:layout_width="153dp"
-        android:layout_height="142dp"
-        android:layout_marginTop="494dp"
-        android:layout_marginEnd="62dp"
         android:layout_width="158dp"
         android:layout_height="158dp"
         android:background="@drawable/bg_grey_black_border"
@@ -296,7 +291,7 @@
         android:padding="8dp"
         app:layout_constraintBottom_toTopOf="@+id/bluetooth_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/gridMap">
+        app:layout_constraintTop_toBottomOf="@+id/f32Banner">
 
         <TextView
             android:id="@+id/robotStatusTitle"
@@ -360,11 +355,11 @@
         android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         android:padding="2dp"
-        android:background="@drawable/bg_grey_black_border"
-        app:layout_constraintStart_toEndOf="@+id/start_controls"
-        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls">
 
         <Chronometer
             android:id="@+id/task1Chronometer"
@@ -384,11 +379,11 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         android:padding="2dp"
-        android:background="@drawable/bg_grey_black_border"
         app:layout_constraintStart_toEndOf="@+id/linearLayout"
-        app:layout_constraintTop_toBottomOf="@+id/gridMap">
+        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls">
 
         <Chronometer
             android:id="@+id/task2Chronometer"
