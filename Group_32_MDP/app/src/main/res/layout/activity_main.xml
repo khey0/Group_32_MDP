@@ -17,6 +17,12 @@
             android:layout_height="match_parent"
             android:background="@drawable/f1background"
             android:alpha="0.55"/>
+
+        <!-- Dark overlay -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#8"/> <!-- 50% transparent black -->
     </FrameLayout>
 
     <!-- Bluetooth Controls -->
@@ -303,13 +309,6 @@
 
 
     <!-- Start task buttons and timer -->
-    <Button
-        android:id="@+id/sendObstacleInfoButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send Obstacle Information"
-        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls"
-        tools:layout_editor_absoluteX="9dp" />
 
     <LinearLayout
         android:id="@+id/linearLayout"

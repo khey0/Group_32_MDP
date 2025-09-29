@@ -59,7 +59,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var editObstacleToggle: Switch? = null
     private var dragObstacleToggle: Switch? = null
     private var isObstaclePlacementActive: Boolean = false
-    private var sendObstacleInfoButton: Button? = null
     // car buttons and variables
     private var setStartButton: Button? = null
     private var flButton: ImageButton? = null
@@ -272,7 +271,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         obstacleIcon = findViewById(R.id.obstacleIcon)
         editObstacleToggle = findViewById(R.id.editObstacleToggle)
         dragObstacleToggle = findViewById(R.id.dragObstacleToggle)
-        sendObstacleInfoButton = findViewById(R.id.sendObstacleInfoButton)
 
         //Initialize Task buttons and timers
         task1Button = findViewById(R.id.task1Button)
@@ -421,16 +419,6 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             } else {
                 gridMap?.setDragMode(false)
                 android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        sendObstacleInfoButton?.setOnClickListener {
-            if (isBound && bluetoothService != null) {
-                // Get formatted obstacle string
-                val obstacleData = GridData.getObstaclesFormattedString()
-
-                // Send via your Bluetooth service
-                bluetoothService!!.sendMessage(obstacleData)
             }
         }
 
