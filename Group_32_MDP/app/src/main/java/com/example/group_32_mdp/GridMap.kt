@@ -521,14 +521,14 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         cellPaint.color = Color.parseColor("#0B0D0F") // f1_road_dark
         cellPaint.style = Paint.Style.FILL
 
-        // X labels centered with black text for visibility
-        xTextPaint.color = Color.BLACK
+        // X labels centered with white text for visibility
+        xTextPaint.color = Color.WHITE
         xTextPaint.textSize = 12f * scaledDensity
         xTextPaint.textAlign = Paint.Align.CENTER
         xTextPaint.isAntiAlias = true
 
-        // Y labels right-aligned near the grid left edge with black text
-        yTextPaint.color = Color.BLACK
+        // Y labels right-aligned near the grid left edge with white text
+        yTextPaint.color = Color.WHITE
         yTextPaint.textSize = 12f * scaledDensity
         yTextPaint.textAlign = Paint.Align.RIGHT
         yTextPaint.isAntiAlias = true
