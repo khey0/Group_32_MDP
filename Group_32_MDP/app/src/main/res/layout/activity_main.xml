@@ -16,11 +16,9 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.55"
+            android:alpha="0.8"
             android:background="@drawable/f1background" />
 
-        <!-- Dark overlay -->
-        <!-- 50% transparent black -->
     </FrameLayout>
 
     <!-- Bluetooth Controls -->
@@ -31,14 +29,12 @@
         android:layout_width="340dp"
         android:layout_height="209dp"
         android:layout_marginEnd="4dp"
-        android:background="@drawable/border_black"
+        android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
-        android:padding="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/obstacle_controls"
-        app:layout_constraintTop_toBottomOf="@+id/robotStatusBox"
+        app:layout_constraintTop_toBottomOf="@+id/gridMap"
         app:layout_constraintVertical_bias="0.044">
 
         <Button
@@ -52,10 +48,11 @@
             android:id="@+id/statusText"
             android:layout_width="match_parent"
             android:layout_height="25dp"
-            android:background="@android:color/white"
+            android:background="@drawable/bg_grey_black_border"
             android:fontFamily="@font/coda"
             android:padding="4dp"
             android:text="@string/not_connected"
+            android:textColor="@color/colorWhite"
             android:textSize="14sp" />
 
         <LinearLayout
@@ -70,7 +67,8 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/coda"
                 android:hint="@string/type_your_message"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@color/colorWhite" />
 
             <Button
                 android:id="@+id/sendBtn"
@@ -85,7 +83,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
-            android:text="@string/received_messages" />
+            android:text="@string/received_messages"
+            android:textColor="@color/colorWhite" />
 
         <ScrollView
             android:id="@+id/msgScroll"
@@ -256,7 +255,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/coda"
                     android:text="Edit Obstacle:"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@color/colorWhite" />
 
                 <Switch
                     android:id="@+id/editObstacleToggle"
@@ -274,7 +273,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/coda"
                     android:text="Drag Obstacle:"
-                    android:textColor="@color/colorBlack" />
+                    android:textColor="@color/colorWhite" />
 
                 <Switch
                     android:id="@+id/dragObstacleToggle"
@@ -290,11 +289,14 @@
         android:layout_height="142dp"
         android:layout_marginTop="494dp"
         android:layout_marginEnd="62dp"
+        android:layout_width="158dp"
+        android:layout_height="158dp"
+        android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="@+id/frameLayout"
-        app:layout_constraintStart_toEndOf="@+id/gridMap"
-        app:layout_constraintTop_toBottomOf="@+id/f32Banner">
+        app:layout_constraintBottom_toTopOf="@+id/bluetooth_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/gridMap">
 
         <TextView
             android:id="@+id/robotStatusTitle"
@@ -302,7 +304,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:text="Robot Status"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:textStyle="bold" />
 
         <TextView
@@ -311,7 +313,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/coda"
-            android:text="Ready" />
+            android:text="Ready"
+            android:textColor="@color/colorWhite" />
 
         <TextView
             android:id="@+id/directionTitle"
@@ -319,7 +322,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:text="Direction"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:textStyle="bold" />
 
         <TextView
@@ -328,7 +331,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/coda"
-            android:text="None" />
+            android:text="None"
+            android:textColor="@color/colorWhite" />
 
         <TextView
             android:id="@+id/coordinatesTitle"
@@ -336,7 +340,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:text="Coordinates"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:textStyle="bold" />
 
         <TextView
@@ -345,7 +349,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/coda"
-            android:text="X: 0, Y: 0" />
+            android:text="X: 0, Y: 0"
+            android:textColor="@color/colorWhite" />
     </LinearLayout>
 
 
@@ -357,6 +362,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="2dp"
+        android:background="@drawable/bg_grey_black_border"
         app:layout_constraintStart_toEndOf="@+id/start_controls"
         app:layout_constraintTop_toBottomOf="@+id/gridMap">
 
@@ -364,7 +370,8 @@
             android:id="@+id/task1Chronometer"
             android:layout_width="124dp"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda" />
+            android:fontFamily="@font/coda"
+            android:textColor="@color/colorWhite" />
 
         <Button
             android:id="@+id/task1Button"
@@ -379,6 +386,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="2dp"
+        android:background="@drawable/bg_grey_black_border"
         app:layout_constraintStart_toEndOf="@+id/linearLayout"
         app:layout_constraintTop_toBottomOf="@+id/gridMap">
 
@@ -386,7 +394,8 @@
             android:id="@+id/task2Chronometer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda" />
+            android:fontFamily="@font/coda"
+            android:textColor="@color/colorWhite" />
 
         <Button
             android:id="@+id/task2Button"
@@ -394,7 +403,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:text="Start Task 2" />
-
     </LinearLayout>
 
 
