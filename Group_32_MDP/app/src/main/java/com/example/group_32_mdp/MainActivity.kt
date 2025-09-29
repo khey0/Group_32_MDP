@@ -194,8 +194,13 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                         } catch (e: Exception) {
                             Log.w("MainActivity", "Failed to parse JSON: $msg", e)
                         }
+
                     }
 
+
+                    if (msg in listOf("f", "b", "fl", "fr", "bl", "br")) {
+                        handleBluetoothCarCommand(msg)
+                    }
 
 
                 }
@@ -372,8 +377,8 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
         }
         gridMap?.onCarUpdated = { x, y, direction ->
             runOnUiThread {
-                coordinatesStatusText!!.text = "Coordinates: ($x, $y)"
-                directionStatusText!!.text = "Direction: $direction"
+                coordinatesStatusText!!.text = "($x, $y)"
+                directionStatusText!!.text = "$direction"
             }
         }
 
@@ -561,24 +566,24 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
             bluetoothService?.sendMessage(message)
         }
     }
+    // to handle receiving car commands through bluetooth
+    private fun handleBluetoothCarCommand(command: String) {
+        val car = GridData.getCar() ?: return
 
-    fun updateRobotStatus(status: String) {
-        runOnUiThread {
-            robotStatusText?.text = "Status: $status"
+        when (command) {
+            "f"  -> car.moveForward()
+            "b"  -> car.moveBackward()
+            "fl" -> car.moveForwardLeft()
+            "fr" -> car.moveForwardRight()
+            "bl" -> car.moveBackwardLeft()
+            "br" -> car.moveBackwardRight()
         }
+
+        gridMap?.invalidate() // redraw the grid
     }
 
-    fun updateCoordinatesStatus(x: Int, y: Int) {
-        runOnUiThread {
-            coordinatesStatusText?.text = "Coordinates: ($x, $y)"
-        }
-    }
 
-    fun updateDirectionStatus(direction: String) {
-        runOnUiThread {
-            directionStatusText?.text = "Direction: $direction"
-        }
-    }
+
 
     private val REQUESTBLUETOOTHPERMISSIONS = 100
 
