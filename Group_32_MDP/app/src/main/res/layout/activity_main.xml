@@ -47,6 +47,7 @@
             android:id="@+id/bluetoothUIButton"
             android:layout_width="match_parent"
             android:layout_height="36dp"
+            android:fontFamily="@font/coda"
             android:text="@string/connect_to_a_device" />
 
         <TextView
@@ -54,6 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="25dp"
             android:background="@android:color/white"
+            android:fontFamily="@font/coda"
             android:padding="4dp"
             android:text="@string/not_connected"
             android:textSize="14sp" />
@@ -68,6 +70,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/coda"
                 android:hint="@string/type_your_message"
                 android:inputType="text" />
 
@@ -75,6 +78,7 @@
                 android:id="@+id/sendBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/coda"
                 android:text="@string/send" />
         </LinearLayout>
 
@@ -82,6 +86,7 @@
             android:id="@+id/receivedMsgLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/coda"
             android:text="@string/received_messages" />
 
         <ScrollView
@@ -130,6 +135,7 @@
             android:id="@+id/setStartButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/coda"
             android:text="Set Start Point"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -233,6 +239,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/coda"
                     android:text="Edit Obstacle:"
                     android:textColor="@color/colorBlack" />
 
@@ -250,6 +257,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/coda"
                     android:text="Drag Obstacle:"
                     android:textColor="@color/colorBlack" />
 
@@ -274,6 +282,7 @@
             android:id="@+id/robotStatusTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/coda"
             android:text="Robot Status"
             android:textStyle="bold"
             android:textColor="@color/colorBlack" />
@@ -283,12 +292,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:fontFamily="@font/coda"
             android:text="Ready" />
 
         <TextView
             android:id="@+id/directionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/coda"
             android:text="Direction"
             android:textStyle="bold"
             android:textColor="@color/colorBlack" />
@@ -298,12 +309,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:fontFamily="@font/coda"
             android:text="None" />
 
         <TextView
             android:id="@+id/coordinatesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/coda"
             android:text="Coordinates"
             android:textStyle="bold"
             android:textColor="@color/colorBlack" />
@@ -313,6 +326,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:fontFamily="@font/coda"
             android:text="X: 0, Y: 0" />
     </LinearLayout>
 
@@ -331,14 +345,15 @@
         <Chronometer
             android:id="@+id/task1Chronometer"
             android:layout_width="124dp"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/coda" />
 
         <Button
             android:id="@+id/task1Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Task 1"
- />
+            android:fontFamily="@font/coda"
+            android:text="Start Task 1" />
     </LinearLayout>
 
     <LinearLayout
@@ -352,14 +367,15 @@
         <Chronometer
             android:id="@+id/task2Chronometer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/coda" />
 
         <Button
             android:id="@+id/task2Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Task 2"
- />
+            android:fontFamily="@font/coda"
+            android:text="Start Task 2" />
     </LinearLayout>
 
 
