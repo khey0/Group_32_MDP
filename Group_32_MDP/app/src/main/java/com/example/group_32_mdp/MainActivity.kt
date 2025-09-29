@@ -69,7 +69,9 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     private var bButton: ImageButton? = null
     private var brButton: ImageButton? = null
 
-
+    // Performance optimization variables
+    private var lastButtonClickTime = 0L
+    private var isEditDialogOpen = false
 
     private val serviceConnection: ServiceConnection = object : ServiceConnection {
         // Binds BluetoothService methods to MainActivity for us to call its methods
@@ -341,21 +343,24 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
         // Edit obstacle switch
         editObstacleToggle?.setOnCheckedChangeListener { _, isChecked ->
-            // Leaving placement mode if switching to edit
+            // Prevent rapid toggling
+            if (System.currentTimeMillis() - lastButtonClickTime < 300) {
+                editObstacleToggle?.isChecked = !isChecked // Revert the change
+                return@setOnCheckedChangeListener
+            }
+            lastButtonClickTime = System.currentTimeMillis()
+            
             if (isChecked) {
+                // Turn off other modes when enabling edit mode
                 isObstaclePlacementActive = false
                 obstacleIcon?.alpha = 1.0f
-                gridMap?.setEditMode(true)
-                // toggle off drag
                 if (dragObstacleToggle?.isChecked == true) dragObstacleToggle?.isChecked = false
-                android.widget.Toast.makeText(this, "edit obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
-
-                // Turn OFF car placement if active
                 if (gridMap?.isPlacingCar() == true) {
                     gridMap?.disableCarPlacement()
+                    setStartButton?.alpha = 1.0f
                 }
-                setStartButton?.alpha = 1.0f
-
+                gridMap?.setEditMode(true)
+                android.widget.Toast.makeText(this, "edit obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 gridMap?.setEditMode(false)
                 android.widget.Toast.makeText(this, "edit obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
@@ -403,21 +408,24 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
 
         // Drag obstacle switch
         dragObstacleToggle?.setOnCheckedChangeListener { _, isChecked ->
-            // Leaving placement mode if switching to drag
+            // Prevent rapid toggling
+            if (System.currentTimeMillis() - lastButtonClickTime < 300) {
+                dragObstacleToggle?.isChecked = !isChecked // Revert the change
+                return@setOnCheckedChangeListener
+            }
+            lastButtonClickTime = System.currentTimeMillis()
+            
             if (isChecked) {
+                // Turn off other modes when enabling drag mode
                 isObstaclePlacementActive = false
                 obstacleIcon?.alpha = 1.0f
-                gridMap?.setDragMode(true)
-                // toggle off edit
                 if (editObstacleToggle?.isChecked == true) editObstacleToggle?.isChecked = false
-                android.widget.Toast.makeText(this, "drag obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
-
-                // Turn OFF car placement if active
                 if (gridMap?.isPlacingCar() == true) {
                     gridMap?.disableCarPlacement()
+                    setStartButton?.alpha = 1.0f
                 }
-                setStartButton?.alpha = 1.0f
-
+                gridMap?.setDragMode(true)
+                android.widget.Toast.makeText(this, "drag obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 gridMap?.setDragMode(false)
                 android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
@@ -513,8 +521,17 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
     }
 
     override fun onObstacleEditRequested(obstacle: Obstacle) {
+        // Prevent multiple dialogs from opening
+        if (isEditDialogOpen) {
+            return
+        }
+        
+        isEditDialogOpen = true
         // Show edit dialog
         val dialog = EditObstacleDialog.newInstance(obstacle)
+        dialog.setOnDismissListener {
+            isEditDialogOpen = false
+        }
         dialog.show(supportFragmentManager, "EditObstacleDialog")
     }
 

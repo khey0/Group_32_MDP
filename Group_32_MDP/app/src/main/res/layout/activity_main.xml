@@ -87,11 +87,17 @@
     <!-- Obstacle Controls -->
 
     <!-- Obstacle Controls -->
+
     <com.example.group_32_mdp.GridMap
         android:id="@+id/gridMap"
-        android:layout_width="566dp"
-        android:layout_height="563dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="524dp"
+        android:layout_height="486dp"
+        android:layout_marginTop="68dp"
+        android:layout_marginEnd="8dp"
+        android:padding="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/start_controls"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toStartOf="@+id/bluetooth_layout"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -253,7 +259,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Robot Status"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack" />
 
         <TextView
             android:id="@+id/robotStatus"
@@ -267,7 +274,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Direction"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack" />
 
         <TextView
             android:id="@+id/directionStatus"
@@ -281,7 +289,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Coordinates"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/colorBlack" />
 
         <TextView
             android:id="@+id/coordinatesStatus"
@@ -319,7 +328,8 @@
             android:id="@+id/task1Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Task 1" />
+            android:text="Start Task 1"
+ />
     </LinearLayout>
 
     <LinearLayout
@@ -339,7 +349,8 @@
             android:id="@+id/task2Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Task 2" />
+            android:text="Start Task 2"
+ />
     </LinearLayout>
 
 

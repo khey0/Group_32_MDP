@@ -6,4 +6,8 @@
     <color name="colorBlack">#FF000000</color>
     <color name="colorYellow">#FFFFEB3B</color>
     <color name="transparent">#00000000</color>
+    
+    <!-- F1 Road Colors -->
+    <color name="f1_road_teal">#00D2BE</color>
+    <color name="f1_road_dark">#0B0D0F</color>
 </resources>

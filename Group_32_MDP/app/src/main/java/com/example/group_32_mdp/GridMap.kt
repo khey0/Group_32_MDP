@@ -32,13 +32,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val ROW = 20
     private var cellSize: Float = 0f
 
-    // Reserve space for axis labels (px)
     private val density = resources.displayMetrics.density
     private val scaledDensity = resources.displayMetrics.scaledDensity
-    private val axisMarginPx = 24f * density
-
-    // Limit grid to avoid spanning full width (fraction of available width)
-    private val maxWidthFraction = 0.80f
 
     // Obstacle management
     private var isObstacleMode = false
@@ -62,7 +57,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val arrowLeft by lazy { BitmapFactory.decodeResource(resources, R.drawable.arrow_left) }
     private val stopIcon by lazy { BitmapFactory.decodeResource(resources, R.drawable.stop_icon) }
 
-    // Grid origin coordinates
+    // Grid origin coordinates (top-left corner of grid area, not including label bands)
     private var originX: Float = 0f
     private var originY: Float = 0f
 
@@ -82,25 +77,31 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     fun setObstacleMode(enabled: Boolean) {
         isObstacleMode = enabled
-        isDragMode = false
-        isEditMode = false
-        isSettingStart = false
+        if (enabled) {
+            isDragMode = false
+            isEditMode = false
+            isSettingStart = false
+        }
         invalidate()
     }
 
     fun setDragMode(enabled: Boolean) {
         isDragMode = enabled
-        isObstacleMode = false
-        isEditMode = false
-        isSettingStart = false
+        if (enabled) {
+            isObstacleMode = false
+            isEditMode = false
+            isSettingStart = false
+        }
         invalidate()
     }
 
     fun setEditMode(enabled: Boolean) {
         isEditMode = enabled
-        isObstacleMode = false
-        isDragMode = false
-        isSettingStart = false
+        if (enabled) {
+            isObstacleMode = false
+            isDragMode = false
+            isSettingStart = false
+        }
         invalidate()
     }
 
@@ -111,9 +112,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         invalidate()
         return obstacle
     }
-    
+
     private fun getNextAvailableId(): Int {
-        // Find the lowest available ID starting from 1
         val existingIds = mutableSetOf<Int>()
         for (y in 0 until ROW) {
             for (x in 0 until COL) {
@@ -123,12 +123,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 }
             }
         }
-        
-        // Find the first available ID starting from 1
         var id = 1
-        while (existingIds.contains(id)) {
-            id++
-        }
+        while (existingIds.contains(id)) id++
         return id
     }
 
@@ -143,49 +139,61 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         invalidate()
     }
 
+    // -----------------------------
+    // Helpers for dp and text sizes
+    // -----------------------------
+    private fun dp(v: Float) = v * resources.displayMetrics.density
+
+    private fun textHeight(paint: Paint): Float {
+        val fm = paint.fontMetrics
+        return fm.bottom - fm.top
+    }
+
+    // -----------------------------
+    // Drawing
+    // -----------------------------
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
         initPaints()
 
-        val rawAvailableWidth = width - paddingLeft - paddingRight
-        val availableWidth = rawAvailableWidth - axisMarginPx // reserve left margin for Y labels
-        val availableHeight = height - paddingTop - paddingBottom - axisMarginPx // reserve bottom for X labels
+        // 1) Reserve measured bands for axis labels
+        val yLabelMaxSample = "19" // widest among 0..19
+        val yLabelWidth = yTextPaint.measureText(yLabelMaxSample) + dp(6f)    // left band
+        val xLabelHeight = textHeight(xTextPaint) + dp(4f)                    // bottom band
 
-        // Constrain width usage so grid doesn't span entire width
-        val widthCap = availableWidth * maxWidthFraction
-        val candidateSide = min(availableHeight, widthCap)
+        // 2) Available area after padding + label bands
+        val leftPad   = paddingLeft.toFloat()
+        val topPad    = paddingTop.toFloat()
+        val rightPad  = paddingRight.toFloat()
+        val bottomPad = paddingBottom.toFloat()
 
-        // Use integer-rounded cell size to avoid cumulative float error so every line shows
-        cellSize = floor(candidateSide / COL)
-        val gridSide = cellSize * COL
+        val availW = width - leftPad - rightPad
+        val availH = height - topPad - bottomPad
+        val gridMaxW = availW - yLabelWidth
+        val gridMaxH = availH - xLabelHeight
+        if (gridMaxW <= 0f || gridMaxH <= 0f) return
 
-        // Origin: shift right by left axis margin; center remaining space
-        val extraSpaceX = availableWidth - gridSide
-        // Pin grid as far left as possible while preserving Y-axis label margin
-        originX = paddingLeft + axisMarginPx
-        originY = paddingTop.toFloat()
+        // 3) Square cells; expand until one side hits the limit
+        cellSize = min(gridMaxW / COL, gridMaxH / ROW)
+        val gridW = cellSize * COL
+        val gridH = cellSize * ROW
 
-        // Draw cells first
+        // 4) Place grid snug against labels (top-left of grid area)
+        originX = leftPad + yLabelWidth
+        originY = topPad
+
+        // 5) Draw cell backgrounds
         for (x in 0 until COL) {
             for (y in 0 until ROW) {
-                val left = originX + x * cellSize
-                val top = originY + y * cellSize
-                val right = left + cellSize
-                val bottom = top + cellSize
-                canvas.drawRect(left, top, right, bottom, cellPaint)
+                val l = originX + x * cellSize
+                val t = originY + y * cellSize
+                canvas.drawRect(l, t, l + cellSize, t + cellSize, cellPaint)
             }
         }
 
-        // Draw obstacles
-        drawObstacles(canvas)
-        // Draw Car
-        drawCar(canvas)
-
-
-        // Draw grid lines pixel-aligned so none disappear
-        val endX = originX + gridSide
-        val endY = originY + gridSide
+        // 6) Grid lines (pixel-aligned) - draw first so they're behind everything
+        val endX = originX + gridW
+        val endY = originY + gridH
         for (i in 0..COL) {
             val xPos = originX + i * cellSize
             val px = round(xPos) + 0.5f
@@ -197,118 +205,93 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             canvas.drawLine(originX, py, endX, py, gridLinePaint)
         }
 
-        // X-axis numbers 0-19 at bottom (centered per cell)
+        // 7) F1 road dotted lines
+        drawRoadDottedLines(canvas)
+
+        // 8) Obstacles & car - draw last so they're on top
+        drawObstacles(canvas)
+        drawCar(canvas)
+
+        // 9) Axis labels - positioned below and to the left of grid
+        // X labels (0..19) - positioned below the grid
+        val xBaseline = endY + 20f // Simple positioning below grid
         for (x in 0 until COL) {
             val cx = originX + x * cellSize + cellSize / 2f
-            canvas.drawText(x.toString(), cx, endY + 12f * density, xTextPaint)
+            canvas.drawText(x.toString(), cx, xBaseline, xTextPaint)
         }
-        // Y-axis numbers on the left (0 at bottom, 19 at top)
+
+        // Y labels (19 at top to 0 at bottom) - positioned to the left of grid
+        val yLabelRight = originX - 10f // Simple positioning to the left
         for (y in 0 until ROW) {
             val label = (ROW - 1 - y).toString()
-            val cy = originY + y * cellSize + cellSize / 2f + 3f
-            val labelX = originX - 6f * density
-            canvas.drawText(label, labelX, cy, yTextPaint)
+            val cy = originY + y * cellSize + cellSize / 2f + 5f // Center vertically in cell
+            canvas.drawText(label, yLabelRight, cy, yTextPaint)
         }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // Compute desired size so the view wraps just the grid plus axis margins
-        val specWidth = MeasureSpec.getSize(widthMeasureSpec)
-        val specHeight = MeasureSpec.getSize(heightMeasureSpec)
-        val specWidthMode = MeasureSpec.getMode(widthMeasureSpec)
-        val specHeightMode = MeasureSpec.getMode(heightMeasureSpec)
-
-        val paddingW = paddingLeft + paddingRight
-        val paddingH = paddingTop + paddingBottom
-
-        val availableWidth = (if (specWidthMode == MeasureSpec.UNSPECIFIED) Int.MAX_VALUE else specWidth) - paddingW
-        val availableHeight = (if (specHeightMode == MeasureSpec.UNSPECIFIED) Int.MAX_VALUE else specHeight) - paddingH
-
-        // Reserve margins for labels
-        val usableWidth = (availableWidth - axisMarginPx).coerceAtLeast(0f)
-        val usableHeight = (availableHeight - axisMarginPx).coerceAtLeast(0f)
-
-        // Constrain width usage so grid doesn't span entire width
-        val widthCap = usableWidth * maxWidthFraction
-        val candidateSide = min(usableHeight, widthCap)
-        val desiredCell = if (candidateSide > 0) floor(candidateSide / COL) else 0f
-        val gridSide = (desiredCell * COL).coerceAtLeast(0f)
-
-        val desiredWidth = (axisMarginPx + gridSide + paddingW).toInt()
-        val desiredHeight = (axisMarginPx + gridSide + paddingH).toInt()
-
-        val measuredW = resolveSize(desiredWidth, widthMeasureSpec)
-        val measuredH = resolveSize(desiredHeight, heightMeasureSpec)
-        setMeasuredDimension(measuredW, measuredH)
+        // Let parent decide; provide sensible default size
+        val defaultSide = (320 * resources.displayMetrics.density).toInt()
+        val w = resolveSize(defaultSide, widthMeasureSpec)
+        val h = resolveSize(defaultSide, heightMeasureSpec)
+        setMeasuredDimension(w, h)
     }
 
+    // -----------------------------
+    // Obstacles & Car
+    // -----------------------------
     private fun drawObstacles(canvas: Canvas) {
-        // Draw obstacles from GridData
         for (y in 0 until ROW) {
             for (x in 0 until COL) {
                 val cell = GridData.getCell(x, y)
                 if (cell?.hasObstacle == true) {
-                    // Hide the original while dragging the same obstacle
                     if (isDragging && draggedObstacle != null && draggedObstacle!!.x == x && draggedObstacle!!.y == y) {
                         continue
                     }
-                    // Convert from bottom-up coordinate system to top-down drawing system
                     val drawY = ROW - 1 - y
                     val left = originX + x * cellSize
                     val top = originY + drawY * cellSize
                     val right = left + cellSize
                     val bottom = top + cellSize
 
-                    // Draw obstacle (black square)
                     canvas.drawRect(left, top, right, bottom, obstaclePaint)
 
-                    // Draw obstacle label/target if present
                     val textX = left + cellSize / 2f
                     val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
 
                     val targetId = TargetAssignments.getTargetId(cell.obstacleId)
                     val label = targetId?.let { ObstacleCatalog.idToLabel[it] }
 
-                    if (label == "UP") {
-                        drawCenteredBitmap(canvas, arrowUp, left, top)
-                    } else if (label == "DOWN") {
-                        drawCenteredBitmap(canvas, arrowDown, left, top)
-                    } else if (label == "RIGHT") {
-                        drawCenteredBitmap(canvas, arrowRight, left, top)
-                    } else if (label == "LEFT") {
-                        drawCenteredBitmap(canvas, arrowLeft, left, top)
-                    } else if (label == "STOP") {
-                        drawCenteredBitmap(canvas, stopIcon, left, top)
-                    } else {
-                        // Default: show label (A..Z or 1..9) in white on black
-                        val textToDraw = label ?: cell.obstacleId.toString()
-                        canvas.drawText(textToDraw, textX, textY, obstacleTextPaint)
+                    when (label) {
+                        "UP" -> drawCenteredBitmap(canvas, arrowUp, left, top)
+                        "DOWN" -> drawCenteredBitmap(canvas, arrowDown, left, top)
+                        "RIGHT" -> drawCenteredBitmap(canvas, arrowRight, left, top)
+                        "LEFT" -> drawCenteredBitmap(canvas, arrowLeft, left, top)
+                        "STOP" -> drawCenteredBitmap(canvas, stopIcon, left, top)
+                        else -> {
+                            val textToDraw = label ?: cell.obstacleId.toString()
+                            canvas.drawText(textToDraw, textX, textY, obstacleTextPaint)
+                        }
                     }
 
-                    // Draw direction indicator (yellow border on the specified side)
                     drawDirectionIndicator(canvas, cell.direction, left, top, right, bottom)
                 }
             }
         }
 
-        // Draw floating obstacle following the finger while dragging
+        // Floating obstacle while dragging
         if (isDragging && draggedObstacle != null) {
             val left = dragTouchX - cellSize / 2f
             val top = dragTouchY - cellSize / 2f
             val right = left + cellSize
             val bottom = top + cellSize
 
-            // Draw dragged obstacle with slight transparency
-            val draggedPaint = Paint(obstaclePaint)
-            draggedPaint.alpha = 160
+            val draggedPaint = Paint(obstaclePaint).apply { alpha = 160 }
             canvas.drawRect(left, top, right, bottom, draggedPaint)
 
-            // Draw obstacle number
             val textX = left + cellSize / 2f
             val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
             canvas.drawText(draggedObstacle!!.id.toString(), textX, textY, obstacleTextPaint)
-
-            // Draw direction indicator
             drawDirectionIndicator(canvas, draggedObstacle!!.direction, left, top, right, bottom)
         }
     }
@@ -325,7 +308,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private fun drawCar(canvas: Canvas) {
         GridData.getCar()?.let { c ->
             carBitmap?.let { bitmap ->
-                val drawY = ROW - 1 - c.y // invert Y for canvas drawing
+                val drawY = ROW - 1 - c.y
                 val left = originX + c.x * cellSize
                 val top = originY + drawY * cellSize
                 val targetRect = android.graphics.RectF(
@@ -336,8 +319,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 )
 
                 val matrix = android.graphics.Matrix()
-
-                // Step 1: rotate around bitmap center
                 val angle = when (c.direction) {
                     Direction.NORTH -> 0f
                     Direction.EAST  -> 90f
@@ -348,31 +329,25 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                 val centerY = bitmap.height / 2f
                 matrix.postRotate(angle, centerX, centerY)
 
-                // Step 2: map the rotated bitmap bounds
                 val rotatedBounds = android.graphics.RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
                 matrix.mapRect(rotatedBounds)
 
-                // Step 3: scale so rotated bitmap fits 2×2 cells
                 val scaleX = targetRect.width() / rotatedBounds.width()
                 val scaleY = targetRect.height() / rotatedBounds.height()
                 matrix.postScale(scaleX, scaleY, 0f, 0f)
 
-                // Step 4: re-map bounds after scale
                 val finalBounds = android.graphics.RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
                 matrix.mapRect(finalBounds)
 
-                // Step 5: translate so final bounds top-left aligns with targetRect
                 val dx = targetRect.left - finalBounds.left
                 val dy = targetRect.top - finalBounds.top
                 matrix.postTranslate(dx, dy)
 
-                // Draw
                 canvas.drawBitmap(bitmap, matrix, null)
                 onCarUpdated?.invoke(c.x, c.y, c.direction)
             }
         }
     }
-
 
     // Car functions
     fun enableCarPlacement(){
@@ -380,7 +355,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         isEditMode = false
         isObstacleMode = false
         isDragMode = false
-
         invalidate()
     }
 
@@ -391,9 +365,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     var onCarUpdated: ((x: Int, y: Int, direction: Direction) -> Unit)? = null
-
     var onCarPlacedListener: (() -> Unit)? = null
-
     fun isPlacingCar(): Boolean = isSettingStart
 
     fun setCarBitmap(bitmap: Bitmap) {
@@ -404,43 +376,50 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     fun getRowCount(): Int = ROW
     fun getColCount(): Int = COL
 
-    private fun drawDirectionIndicator(canvas: Canvas, direction: Direction, left: Float, top: Float, right: Float, bottom: Float) {
-        val borderWidth = 4f * density
-        directionPaint.strokeWidth = borderWidth
+    private fun drawRoadDottedLines(canvas: Canvas) {
+        val endX = originX + cellSize * COL
+        val endY = originY + cellSize * ROW
 
-        when (direction) {
-            Direction.NORTH -> {
-                // Top border
-                canvas.drawLine(left, top, right, top, directionPaint)
-            }
-            Direction.SOUTH -> {
-                // Bottom border
-                canvas.drawLine(left, bottom, right, bottom, directionPaint)
-            }
-            Direction.EAST -> {
-                // Right border
-                canvas.drawLine(right, top, right, bottom, directionPaint)
-            }
-            Direction.WEST -> {
-                // Left border
-                canvas.drawLine(left, top, left, bottom, directionPaint)
-            }
+        val dottedPaint = Paint().apply {
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            isAntiAlias = true
+            pathEffect = android.graphics.DashPathEffect(floatArrayOf(8f, 8f), 0f)
+        }
+
+        for (i in 1 until COL) {
+            val xPos = originX + i * cellSize
+            canvas.drawLine(xPos, originY, xPos, endY, dottedPaint)
+        }
+        for (i in 1 until ROW) {
+            val yPos = originY + i * cellSize
+            canvas.drawLine(originX, yPos, endX, yPos, dottedPaint)
         }
     }
 
+    private fun drawDirectionIndicator(canvas: Canvas, direction: Direction, left: Float, top: Float, right: Float, bottom: Float) {
+        val borderWidth = 4f * density
+        directionPaint.strokeWidth = borderWidth
+        when (direction) {
+            Direction.NORTH -> canvas.drawLine(left, top, right, top, directionPaint)
+            Direction.SOUTH -> canvas.drawLine(left, bottom, right, bottom, directionPaint)
+            Direction.EAST  -> canvas.drawLine(right, top, right, bottom, directionPaint)
+            Direction.WEST  -> canvas.drawLine(left, top, left, bottom, directionPaint)
+        }
+    }
+
+    // Touch handling
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (cellSize == 0f) return false
 
         val x = event.x
         val y = event.y
 
-        // Convert touch coordinates to grid coordinates
         val gridX = ((x - originX) / cellSize).toInt()
         val gridY = ((y - originY) / cellSize).toInt()
 
-        // For drag mode, we need to handle touches outside grid bounds
         if (isDragMode && draggedObstacle != null) {
-            // Always handle drag events, even outside grid
             when (event.action) {
                 MotionEvent.ACTION_MOVE -> {
                     dragTouchX = x
@@ -449,19 +428,14 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     return true
                 }
                 MotionEvent.ACTION_UP -> {
-                    // Check if drop is inside grid
                     if (gridX in 0 until COL && gridY in 0 until ROW) {
-                        // Convert drop coordinates to bottom-up system
                         val flippedDropY = ROW - 1 - gridY
                         val originalX = draggedObstacle!!.x
                         val originalY = draggedObstacle!!.y
-                        
+
                         if (!GridData.hasObstacleAt(gridX, flippedDropY)) {
                             val movedSuccessfully = GridData.moveObstacle(
-                                originalX,
-                                originalY,
-                                gridX,
-                                flippedDropY
+                                originalX, originalY, gridX, flippedDropY
                             )
                             if (movedSuccessfully) {
                                 val updatedObstacle = draggedObstacle!!.copy(x = gridX, y = flippedDropY)
@@ -469,13 +443,12 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                             }
                         }
                     } else {
-                        // Dropped outside grid: delete the obstacle
                         val originalX = draggedObstacle!!.x
                         val originalY = draggedObstacle!!.y
                         GridData.removeObstacle(originalX, originalY)
                         obstacleListener?.onObstacleRemoved(draggedObstacle!!)
                     }
-                    
+
                     draggedObstacle = null
                     isDragging = false
                     invalidate()
@@ -484,7 +457,6 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             }
         }
 
-        // Check if touch is within grid bounds for other modes
         if (gridX < 0 || gridX >= COL || gridY < 0 || gridY >= ROW) {
             return false
         }
@@ -492,17 +464,13 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (isObstacleMode) {
-                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
                     val flippedY = ROW - 1 - gridY
-                    // Check if there's already an obstacle at this position
                     if (!GridData.hasObstacleAt(gridX, flippedY)) {
                         addObstacle(gridX, flippedY)
                     }
                     return true
                 } else if (isDragMode) {
-                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
                     val flippedY = ROW - 1 - gridY
-                    // Find obstacle at this position
                     if (GridData.hasObstacleAt(gridX, flippedY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, flippedY)
                         val direction = GridData.getObstacleDirectionAt(gridX, flippedY) ?: Direction.NORTH
@@ -514,9 +482,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     }
                     return draggedObstacle != null
                 } else if (isEditMode) {
-                    // Convert touch coordinates to bottom-up system (y=0 at bottom)
                     val flippedY = ROW - 1 - gridY
-                    // Find obstacle at this position for editing
                     if (GridData.hasObstacleAt(gridX, flippedY)) {
                         val obstacleId = GridData.getObstacleIdAt(gridX, flippedY)
                         val direction = GridData.getObstacleDirectionAt(gridX, flippedY) ?: Direction.NORTH
@@ -524,21 +490,18 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                         obstacleListener?.onObstacleEditRequested(selectedObstacle!!)
                     }
                     return selectedObstacle != null
-                } else if (isSettingStart) { // flag from MainActivity
-                    if (gridX <= 18 && gridY <= 18) { // ensure 2x2 car fits
+                } else if (isSettingStart) {
+                    if (gridX <= 18 && gridY <= 18) {
                         val flippedY = ROW - 1 - gridY
                         val startCar = Car(x = gridX, y = flippedY, direction = Direction.NORTH)
                         GridData.setCar(startCar)
                         setCarBitmap(BitmapFactory.decodeResource(resources, R.drawable.f1_car))
-
-                        // Log the car coordinates
                         Log.d("GridMap", "Car set at coordinates: x=${startCar.x}, y=${startCar.y}")
                     }
                     isSettingStart = false
                     onCarPlacedListener?.invoke()
                     return true
                 } else {
-                    // Not in placement mode → do nothing on touch
                     return false
                 }
             }
@@ -548,23 +511,23 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     }
 
     private fun initPaints() {
-        // White grid lines with 1px-aligned stroke
-        gridLinePaint.color = Color.WHITE
+        // F1 Road grid lines - thick teal lines
+        gridLinePaint.color = Color.parseColor("#00D2BE") // f1_road_teal
         gridLinePaint.style = Paint.Style.STROKE
-        gridLinePaint.strokeWidth = 1f
-        gridLinePaint.isAntiAlias = false
+        gridLinePaint.strokeWidth = 4f
+        gridLinePaint.isAntiAlias = true
 
-        // Darker red tiles
-        cellPaint.color = Color.parseColor("#C62828")
+        // F1 Road dark background
+        cellPaint.color = Color.parseColor("#0B0D0F") // f1_road_dark
         cellPaint.style = Paint.Style.FILL
 
-        // X labels centered
+        // X labels centered with black text for visibility
         xTextPaint.color = Color.BLACK
         xTextPaint.textSize = 12f * scaledDensity
         xTextPaint.textAlign = Paint.Align.CENTER
         xTextPaint.isAntiAlias = true
 
-        // Y labels right-aligned near the grid left edge
+        // Y labels right-aligned near the grid left edge with black text
         yTextPaint.color = Color.BLACK
         yTextPaint.textSize = 12f * scaledDensity
         yTextPaint.textAlign = Paint.Align.RIGHT
@@ -586,7 +549,7 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         directionPaint.isAntiAlias = true
     }
 
-    // Listen for C9 target updates to refresh the grid immediately
+    // Broadcast to refresh C9 targets
     private val c9Receiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: android.content.Intent?) {
             if (intent?.action == "C9_TARGET_UPDATED") {

@@ -16,9 +16,14 @@ class EditObstacleDialog : DialogFragment() {
 
     private var obstacle: Obstacle? = null
     private var listener: OnObstacleUpdatedListener? = null
+    private var onDismissListener: (() -> Unit)? = null
 
     interface OnObstacleUpdatedListener {
         fun onObstacleUpdated(obstacle: Obstacle)
+    }
+    
+    fun setOnDismissListener(listener: () -> Unit) {
+        onDismissListener = listener
     }
 
     companion object {
@@ -84,5 +89,10 @@ class EditObstacleDialog : DialogFragment() {
         return AlertDialog.Builder(requireContext())
             .setView(view)
             .create()
+    }
+    
+    override fun onDismiss(dialog: android.content.DialogInterface) {
+        super.onDismiss(dialog)
+        onDismissListener?.invoke()
     }
 }
