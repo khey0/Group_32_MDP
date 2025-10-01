@@ -40,18 +40,23 @@
             android:id="@+id/bluetoothUIButton"
             android:layout_width="match_parent"
             android:layout_height="36dp"
-            android:fontFamily="@font/coda"
-            android:text="@string/connect_to_a_device" />
+            android:text="@string/connect_to_a_device"
+            android:background="#850707"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp"
+            android:stateListAnimator="@null"
+            style="@android:style/Widget.Button" />
 
         <TextView
             android:id="@+id/statusText"
             android:layout_width="match_parent"
             android:layout_height="25dp"
             android:background="@drawable/bg_grey_black_border"
-            android:fontFamily="@font/coda"
             android:padding="4dp"
             android:text="@string/not_connected"
-            android:textColor="@color/colorWhite"
+            android:textColor="#FFFFFF"
             android:textSize="14sp" />
 
         <LinearLayout
@@ -64,26 +69,26 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:fontFamily="@font/coda"
                 android:hint="@string/type_your_message"
                 android:inputType="text"
-                android:textColor="@color/colorWhite" />
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/sendBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/coda"
-                android:text="@string/send" />
+                android:text="@string/send"
+                android:background="#850707"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/receivedMsgLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:text="@string/received_messages"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
 
         <ScrollView
             android:id="@+id/msgScroll"
@@ -95,7 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textColor="@color/colorWhite" />
+                android:textColor="#FFFFFF" />
         </ScrollView>
     </LinearLayout>
 
@@ -146,8 +151,10 @@
             android:id="@+id/setStartButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:text="Set Start Point"
+            android:background="#850707"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -252,9 +259,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/coda"
                     android:text="Edit Obstacle:"
-                    android:textColor="@color/colorWhite" />
+                    android:textColor="#FFFFFF" />
 
                 <Switch
                     android:id="@+id/editObstacleToggle"
@@ -270,9 +276,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/coda"
                     android:text="Drag Obstacle:"
-                    android:textColor="@color/colorWhite" />
+                    android:textColor="#FFFFFF" />
 
                 <Switch
                     android:id="@+id/dragObstacleToggle"
@@ -297,55 +302,55 @@
             android:id="@+id/robotStatusTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:text="Robot Status"
-            android:textColor="@color/colorWhite"
-            android:textStyle="bold" />
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/robotStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="@font/coda"
             android:text="Ready"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:id="@+id/directionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:text="Direction"
-            android:textColor="@color/colorWhite"
-            android:textStyle="bold" />
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/directionStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="@font/coda"
             android:text="None"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:id="@+id/coordinatesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:text="Coordinates"
-            android:textColor="@color/colorWhite"
-            android:textStyle="bold" />
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/coordinatesStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:fontFamily="@font/coda"
             android:text="X: 0, Y: 0"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 
 
@@ -365,15 +370,20 @@
             android:id="@+id/task1Chronometer"
             android:layout_width="124dp"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/task1Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:text="Start Task 1" />
+            android:text="Start Task 1"
+            android:background="#850707"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp"
+            android:stateListAnimator="@null"
+            style="@android:style/Widget.Button" />
     </LinearLayout>
 
     <LinearLayout
@@ -389,15 +399,20 @@
             android:id="@+id/task2Chronometer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:textColor="@color/colorWhite" />
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/task2Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:text="Start Task 2" />
+            android:text="Start Task 2"
+            android:background="#850707"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:padding="8dp"
+            android:textSize="14sp"
+            android:stateListAnimator="@null"
+            style="@android:style/Widget.Button" />
     </LinearLayout>
 
 

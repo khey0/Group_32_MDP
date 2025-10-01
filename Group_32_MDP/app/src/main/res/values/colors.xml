@@ -10,4 +10,5 @@
     <!-- F1 Road Colors -->
     <color name="f1_road_teal">#00D2BE</color>
     <color name="f1_road_dark">#0B0D0F</color>
+    <color name="f1_button_red">#850707</color>
 </resources>
