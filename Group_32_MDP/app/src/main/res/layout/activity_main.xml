@@ -15,7 +15,6 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:alpha="0.8"
             android:background="@drawable/f1background" />
 
     </FrameLayout>
@@ -122,6 +121,7 @@
         android:layout_margin="5dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
+        android:alpha="0.0"
         android:src="@drawable/f32_banner"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
