@@ -16,7 +16,6 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
-import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemClickListener
 import android.widget.ArrayAdapter
@@ -30,6 +29,10 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.example.group_32_mdp.BluetoothService.LocalBinder
 import java.util.UUID
 import java.util.function.Function
+import android.graphics.Color
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 
 class BluetoothActivity : AppCompatActivity() {
     private var bluetoothService: BluetoothService? = null
@@ -169,13 +172,19 @@ class BluetoothActivity : AppCompatActivity() {
             val devices: Array<BluetoothDevice> = pairedDevices.toTypedArray()
             val deviceNames = pairedDevices.map { it.name ?: "Unknown Device" }.toTypedArray()
 
-            pairedListView!!.setAdapter(
-                ArrayAdapter<String?>(
-                    this,
-                    android.R.layout.simple_list_item_1,
-                    deviceNames
-                )
-            )
+            pairedListView!!.setAdapter(object : ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_list_item_1,
+                deviceNames
+            ) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getView(position, convertView, parent) as TextView
+                    view.setTextColor(Color.WHITE)   // force white text
+                    return view
+                }
+            })
+
+
 
             pairedListView?.setOnItemClickListener { parent, view, position, id ->
                 val selectedDevice = devices[position]  // non-nullable
@@ -221,9 +230,19 @@ class BluetoothActivity : AppCompatActivity() {
 
         // Clear previous devices
         availableDevices.clear()
-        availableDevicesAdapter =
-            ArrayAdapter<String?>(this, android.R.layout.simple_list_item_1, ArrayList<String?>())
-        availableDevicesList!!.setAdapter(availableDevicesAdapter)
+        availableDevicesAdapter = object : ArrayAdapter<String?>(
+            this,
+            android.R.layout.simple_list_item_1,
+            ArrayList<String>()
+        ) {
+            override fun getView(position: Int, convertView: android.view.View?, parent: ViewGroup): android.view.View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextColor(Color.WHITE) // force white text
+                return view
+            }
+        }
+        availableDevicesList!!.adapter = availableDevicesAdapter
+
 
         // Ensure location is enabled (required for discovery)
         val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager

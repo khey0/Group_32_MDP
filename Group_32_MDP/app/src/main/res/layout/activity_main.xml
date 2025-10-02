@@ -239,6 +239,7 @@
         android:background="@drawable/bg_grey_black_border"
         android:orientation="horizontal"
         android:padding="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/bluetooth_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_controls">
 
@@ -309,8 +310,7 @@
         android:layout_margin="5dp"
         app:layout_constraintBottom_toTopOf="@+id/bluetooth_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/gridMap"
-        app:layout_constraintTop_toBottomOf="@+id/f32Banner">
+        app:layout_constraintStart_toEndOf="@+id/gridMap">
 
         <TextView
             android:id="@+id/robotStatusTitle"
@@ -368,64 +368,83 @@
 
 
     <!-- Start task buttons and timer -->
-
     <LinearLayout
-        android:id="@+id/Task1Layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_grey_black_border"
-        android:orientation="vertical"
-        android:padding="2dp"
-        android:layout_margin="5dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/obstacle_controls"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls">
+        app:layout_constraintEnd_toStartOf="@id/bluetooth_layout">
 
-        <Chronometer
-            android:id="@+id/task1Chronometer"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/Task1Layout"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:background="@drawable/bg_grey_black_border"
+            android:orientation="vertical"
             android:padding="5dp"
-            android:fontFamily="@font/coda"
-            android:gravity="center"
-            android:textColor="@color/colorWhite" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/obstacle_controls">
 
-        <Button
-            android:id="@+id/task1Button"
-            android:layout_width="wrap_content"
+            <Chronometer
+                android:id="@+id/task1Chronometer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/coda"
+                android:gravity="center"
+                android:padding="5dp"
+                android:textColor="@color/colorWhite" />
+
+            <Button
+                android:id="@+id/task1Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/coda"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="5dp"
+                android:text="Start Task 1"
+                android:textSize="15dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Task2Layout"
+            android:layout_width="125dp"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:text="Start Task 1" />
+            android:background="@drawable/bg_grey_black_border"
+            android:orientation="vertical"
+            android:padding="5dp"
+            android:layout_margin="5dp"
+            app:layout_constraintStart_toEndOf="@+id/Task1Layout"
+            app:layout_constraintTop_toBottomOf="@+id/obstacle_controls"
+            app:layout_constraintEnd_toStartOf="@+id/bluetooth_layout"
+            >
+
+            <Chronometer
+                android:id="@+id/task2Chronometer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:fontFamily="@font/coda"
+                android:gravity="center"
+                android:textColor="@color/colorWhite" />
+
+            <Button
+                android:id="@+id/task2Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/coda"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="5dp"
+                android:textSize="15dp"
+                android:layout_gravity="center_horizontal"
+                android:text="Start Task 2" />
+        </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/Task2Layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_grey_black_border"
-        android:orientation="vertical"
-        android:padding="2dp"
-        android:layout_margin="5dp"
-        app:layout_constraintStart_toEndOf="@+id/Task1Layout"
-        app:layout_constraintTop_toBottomOf="@+id/obstacle_controls"
-        app:layout_constraintEnd_toStartOf="@+id/bluetooth_layout"
-        >
-
-        <Chronometer
-            android:id="@+id/task2Chronometer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:fontFamily="@font/coda"
-            android:gravity="center"
-            android:textColor="@color/colorWhite" />
-
-        <Button
-            android:id="@+id/task2Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
-            android:text="Start Task 2" />
-    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
