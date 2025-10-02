@@ -11,4 +11,5 @@
     <color name="f1_road_teal">#00D2BE</color>
     <color name="f1_road_dark">#0B0D0F</color>
     <color name="f1_button_red">#850707</color>
+    <color name="f1_button_dark_red">#911d14</color>
 </resources>

@@ -533,8 +533,8 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         yTextPaint.textAlign = Paint.Align.RIGHT
         yTextPaint.isAntiAlias = true
 
-        // Obstacle paint (black squares)
-        obstaclePaint.color = Color.BLACK
+        // Obstacle paint (dark red squares)
+        obstaclePaint.color = Color.parseColor("#911d14")
         obstaclePaint.style = Paint.Style.FILL
 
         // Obstacle text (white numbers)
