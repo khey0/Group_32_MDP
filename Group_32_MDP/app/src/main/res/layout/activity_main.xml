@@ -42,6 +42,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:padding="5dp"
+            style="@style/F1ButtonStyle"
             android:text="@string/connect_to_a_device" />
 
         <TextView
@@ -79,6 +80,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/coda"
                 android:padding="5dp"
+                style="@style/F1ButtonStyle"
                 android:text="@string/send" />
         </LinearLayout>
 
@@ -156,6 +158,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
+            style="@style/F1ButtonStyle"
             android:text="Set Start Point"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -309,8 +312,8 @@
         android:layout_margin="5dp"
         app:layout_constraintBottom_toTopOf="@+id/bluetooth_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/gridMap"
-        app:layout_constraintTop_toBottomOf="@+id/f32Banner">
+        app:layout_constraintStart_toEndOf="@+id/gridMap">
+
 
         <TextView
             android:id="@+id/robotStatusTitle"
@@ -394,6 +397,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
+            style="@style/F1ButtonStyle"
             android:text="Start Task 1" />
     </LinearLayout>
 
@@ -424,6 +428,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
+            style="@style/F1ButtonStyle"
             android:text="Start Task 2" />
     </LinearLayout>
 

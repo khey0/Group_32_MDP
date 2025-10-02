@@ -325,7 +325,7 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                 gridMap?.setObstacleMode(true)
                 isObstaclePlacementActive = true
                 obstacleIcon?.alpha = 0.5f
-                android.widget.Toast.makeText(this, "Please plot obstacles", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "PLEASE PLOT OBSTACLES", android.widget.Toast.LENGTH_SHORT).show()
                 // turn off other modes
                 editObstacleToggle?.isChecked = false
                 dragObstacleToggle?.isChecked = false
@@ -363,10 +363,10 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                     setStartButton?.alpha = 1.0f
                 }
                 gridMap?.setEditMode(true)
-                android.widget.Toast.makeText(this, "edit obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "EDIT OBSTACLE IS ON", android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 gridMap?.setEditMode(false)
-                android.widget.Toast.makeText(this, "edit obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "EDIT OBSTACLE IS OFF", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -428,10 +428,10 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                     setStartButton?.alpha = 1.0f
                 }
                 gridMap?.setDragMode(true)
-                android.widget.Toast.makeText(this, "drag obstacle is on", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "DRAG OBSTACLE IS ON", android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 gridMap?.setDragMode(false)
-                android.widget.Toast.makeText(this, "drag obstacle is off", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, "DRAG OBSTACLE IS OFF", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
 
