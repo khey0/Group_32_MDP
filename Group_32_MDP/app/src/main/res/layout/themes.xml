@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.MyApp.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Set a solid background to avoid icon flash -->
+        <item name="android:windowBackground">@color/white</item>
+
+        <!-- Disable the default launcher icon -->
+        <item name="android:windowSplashScreenAnimatedIcon">@null</item>
+    </style>
+</resources>

@@ -5,7 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:alpha="1"
+    android:background="@drawable/f1background">
+
+
 
     <Button
         android:id="@+id/scan_button"
@@ -27,12 +31,13 @@
         android:id="@+id/paired_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Paired Devices"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/scan_button"
-        app:layout_constraintStart_toStartOf="parent"
         android:paddingTop="16dp"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="8dp"
+        android:text="Paired Devices"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scan_button" />
 
     <ListView
         android:id="@+id/paired_devices"
@@ -48,12 +53,13 @@
         android:id="@+id/available_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Available Devices"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/paired_devices"
-        app:layout_constraintStart_toStartOf="parent"
         android:paddingTop="16dp"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="8dp"
+        android:text="Available Devices"
+        android:textColor="@color/colorWhite"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/paired_devices" />
 
     <ListView
         android:id="@+id/available_devices"
