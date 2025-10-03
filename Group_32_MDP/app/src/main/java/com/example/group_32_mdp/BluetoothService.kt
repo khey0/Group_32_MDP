@@ -248,6 +248,9 @@ class BluetoothService : Service() {
         sendStatusBroadcast("Disconnected")
     }
 
+    fun setManualDisconnect(boolean: Boolean){
+        manualDisconnect = boolean;
+    }
 
 
     @Throws(Exception::class)

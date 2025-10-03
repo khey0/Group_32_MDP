@@ -226,7 +226,12 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                         reconnectDialog = AlertDialog.Builder(this@MainActivity)
                             .setTitle("Bluetooth Disconnected")
                             .setMessage("Waiting for Bluetooth device to reconnect...")
-                            .setCancelable(false) // blocks user interaction
+                            .setCancelable(true) // <- allow user to dismiss
+                            .setPositiveButton("Cancel") { dialog, _ ->
+                                dialog.dismiss()
+                                bluetoothService?.setManualDisconnect(true)
+                                bluetoothService?.disconnect()
+                            }
                             .create()
                         reconnectDialog?.show()
                     }
