@@ -30,7 +30,7 @@
         android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         android:padding="5dp"
-        app:layout_constraintBottom_toBottomOf="@+id/Task2Layout"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/Task2Layout"
         app:layout_constraintTop_toBottomOf="@+id/gridMap"
@@ -38,11 +38,11 @@
 
         <Button
             android:id="@+id/bluetoothUIButton"
+            style="@style/F1ButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
             android:padding="5dp"
-            style="@style/F1ButtonStyle"
             android:text="@string/connect_to_a_device" />
 
         <TextView
@@ -76,11 +76,11 @@
 
             <Button
                 android:id="@+id/sendBtn"
+                style="@style/F1ButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/coda"
                 android:padding="5dp"
-                style="@style/F1ButtonStyle"
                 android:text="@string/send" />
         </LinearLayout>
 
@@ -277,7 +277,7 @@
                 <Switch
                     android:id="@+id/editObstacleToggle"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="match_parent" />
             </LinearLayout>
 
             <LinearLayout
@@ -297,7 +297,7 @@
                 <Switch
                     android:id="@+id/dragObstacleToggle"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="match_parent" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -306,13 +306,14 @@
         android:id="@+id/robotStatusBox"
         android:layout_width="158dp"
         android:layout_height="158dp"
+        android:layout_margin="5dp"
         android:background="@drawable/bg_grey_black_border"
         android:orientation="vertical"
         android:padding="8dp"
-        android:layout_margin="5dp"
         app:layout_constraintBottom_toTopOf="@+id/bluetooth_layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/gridMap">
+        app:layout_constraintStart_toEndOf="@+id/gridMap"
+        app:layout_constraintTop_toBottomOf="@+id/f32Banner">
 
 
         <TextView
@@ -336,8 +337,8 @@
             android:id="@+id/directionTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/coda"
             android:layout_marginTop="4dp"
+            android:fontFamily="@font/coda"
             android:text="Direction"
             android:textColor="@color/colorWhite"
             android:textStyle="bold" />
@@ -354,9 +355,9 @@
             android:id="@+id/coordinatesTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:fontFamily="@font/coda"
             android:text="Coordinates"
-            android:layout_marginTop="4dp"
             android:textColor="@color/colorWhite"
             android:textStyle="bold" />
 
@@ -394,10 +395,10 @@
 
         <Button
             android:id="@+id/task1Button"
+            style="@style/F1TimerButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
-            style="@style/F1ButtonStyle"
             android:text="Start Task 1" />
     </LinearLayout>
 
@@ -428,7 +429,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/coda"
-            style="@style/F1ButtonStyle"
+            style="@style/F1TimerButtonStyle"
             android:text="Start Task 2" />
     </LinearLayout>
 
