@@ -496,15 +496,24 @@ class BluetoothActivity : AppCompatActivity() {
             "TARGET" -> {
                 if (parts.size >= 3) {
                     val obstacleNo = parts[1].toIntOrNull()
-                    val targetId = parts[2].toIntOrNull()
-                    if (obstacleNo != null && targetId != null) {
-                        TargetAssignments.setTarget(obstacleNo, targetId)
-                        Log.d("C9", "TARGET received -> obstacle=$obstacleNo targetId=$targetId")
-                        // Notify UI components (e.g., GridMap) to refresh
-                        val intent = Intent("C9_TARGET_UPDATED")
-                        intent.putExtra("obstacle", obstacleNo)
-                        intent.putExtra("targetId", targetId)
-                        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                    val targetPart = parts[2].trim()
+                    
+                    if (obstacleNo != null) {
+                        val targetId = if (targetPart.uppercase() == "NULL") {
+                            ObstacleCatalog.NULL_TARGET_ID
+                        } else {
+                            targetPart.toIntOrNull()
+                        }
+                        
+                        if (targetId != null) {
+                            TargetAssignments.setTarget(obstacleNo, targetId)
+                            Log.d("C9", "TARGET received -> obstacle=$obstacleNo targetId=$targetId")
+                            // Notify UI components (e.g., GridMap) to refresh
+                            val intent = Intent("C9_TARGET_UPDATED")
+                            intent.putExtra("obstacle", obstacleNo)
+                            intent.putExtra("targetId", targetId)
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+                        }
                     }
                 }
             }

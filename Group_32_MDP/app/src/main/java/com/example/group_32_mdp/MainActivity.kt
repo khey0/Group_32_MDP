@@ -138,13 +138,19 @@ class MainActivity : AppCompatActivity(), GridMap.ObstacleInteractionListener, E
                         robotStatusText!!.text = "Looking for target"
                     }
                     
-                    // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>"
+                    // Handle TARGET message: "TARGET, <Obstacle Number>, <Target ID>" or "TARGET, <Obstacle Number>, NULL"
                     if (msg.startsWith("TARGET")) {
                         val parts = msg.split(",")
                         if (parts.size == 3) {
                             try {
                                 val obstacleNumber = parts[1].trim().toInt()
-                                val targetId = parts[2].trim().toInt()
+                                val targetPart = parts[2].trim()
+                                
+                                val targetId = if (targetPart.uppercase() == "NULL") {
+                                    ObstacleCatalog.NULL_TARGET_ID
+                                } else {
+                                    targetPart.toInt()
+                                }
                                 
                                 // Set target ID for the obstacle
                                 GridData.setTargetIdForObstacle(obstacleNumber, targetId)

@@ -254,7 +254,13 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
                     val right = left + cellSize
                     val bottom = top + cellSize
 
-                    canvas.drawRect(left, top, right, bottom, obstaclePaint)
+                    // Use blue color for NULL targets, default color for others
+                    val paintToUse = if (ObstacleCatalog.isNullTarget(TargetAssignments.getTargetId(cell.obstacleId))) {
+                        Paint(obstaclePaint).apply { color = Color.BLUE }
+                    } else {
+                        obstaclePaint
+                    }
+                    canvas.drawRect(left, top, right, bottom, paintToUse)
 
                     val textX = left + cellSize / 2f
                     val textY = top + cellSize / 2f + obstacleTextPaint.textSize / 3f
@@ -286,7 +292,15 @@ class GridMap(context: Context, attrs: AttributeSet?) : View(context, attrs) {
             val right = left + cellSize
             val bottom = top + cellSize
 
-            val draggedPaint = Paint(obstaclePaint).apply { alpha = 160 }
+            // Use blue color for NULL targets even while dragging
+            val draggedPaint = if (ObstacleCatalog.isNullTarget(TargetAssignments.getTargetId(draggedObstacle!!.id))) {
+                Paint(obstaclePaint).apply { 
+                    color = Color.BLUE
+                    alpha = 160 
+                }
+            } else {
+                Paint(obstaclePaint).apply { alpha = 160 }
+            }
             canvas.drawRect(left, top, right, bottom, draggedPaint)
 
             val textX = left + cellSize / 2f

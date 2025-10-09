@@ -48,9 +48,15 @@ object ObstacleCatalog {
 		Target("STOP", 40)
 	)
 
+	// Special target ID for NULL targets (blue color)
+	val NULL_TARGET_ID = -1
+
 	// Convenience maps
 	val idToLabel: Map<Int, String> = targets.associate { it.id to it.label }
 	val labelToId: Map<String, Int> = targets.associate { it.label to it.id }
+	
+	// Check if a target ID represents a NULL target (should be blue)
+	fun isNullTarget(targetId: Int?): Boolean = targetId == NULL_TARGET_ID
 }
 
 
